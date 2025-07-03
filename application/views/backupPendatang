@@ -1,0 +1,545 @@
+<!-- //<div class="bg-white shadow-md rounded-lg">
+        <div class="p-6 border-b flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+                <i class="fas fa-user text-blue-600 mr-3"></i>
+                Data Pendatang
+            </h1>
+            <button onclick="openModal()"
+                class="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-lg lg:text-base transition-all duration-300">
+                <i class="fa-solid fa-user-plus mr-2"></i>
+                Tambah Pendatang               
+            </button>
+        </div>
+
+        <div class="p-6">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg text-gray-600">Show</span>
+                    <select id="entries-select" class="border border-gray-300 rounded px-2 py-1 text-lg">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <span class="text-lg text-gray-600">entries</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-lg text-gray-600">Search:</span>
+                    <input type="text" id="search-input" class="border border-gray-300 rounded px-3 py-1 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Cari data...">
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full table-auto">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-600 uppercase text-lg leading-normal">
+                            <th class="py-3 px-6 text-left">No</th>
+                            <th class="py-3 px-6 text-left">Nama</th>
+                            <th class="py-3 px-6 text-left">NIK</th>
+                            <th class="py-3 px-6 text-left">Tanggal Masuk</th>
+                            <th class="py-3 px-6 text-left">Status Verifikasi</th>
+                            <th class="py-3 px-6 text-left">Alasan Penolakan</th>
+                            <th class="py-3 px-6 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-600 text-lg font-light" id="table-body">
+                        <tr class="border-b border-gray-200 hover:bg-gray-100">
+                            <td class="py-3 px-6 text-left whitespace-nowrap">1</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-lg text-gray-900">John Doe</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-lg text-gray-900">3201234567890123</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-lg text-gray-900">2024-01-15</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-lg font-semibold rounded-full bg-green-100 text-green-800">
+                                    Terverifikasi
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-lg text-gray-900">-</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <div class="flex justify-center space-x-3">
+                                    <button onclick="viewData(1)" 
+                                        class="text-blue-600 hover:text-blue-800 transition-colors text-2xl">
+                                        <i class="fas fa-eye "></i>
+                                    </button>
+                                    <button onclick="editData(1)"
+                                        class="text-green-600 hover:text-green-800 transition-colors text-2xl">
+                                        <i class="fas fa-edit "></i>
+                                    </button>
+                                    <button onclick="deleteData(1)"
+                                        class="text-red-600 hover:text-red-800 transition-colors text-2xl">
+                                        <i class="fas fa-trash "></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <tr class="border-b border-gray-200 hover:bg-gray-100">
+                            <td class="py-3 px-6 text-left whitespace-nowrap">2</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-lg text-gray-900">Jane lgith</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-lg text-gray-900">3301234567890124</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-lg text-gray-900">2024-01-20</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-lg font-semibold rounded-full bg-red-100 text-red-800">
+                                    Ditolak
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-lg text-gray-900">Dokumen tidak lengkap</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <div class="flex justify-center space-x-3">
+                                    <button onclick="viewData(2)" 
+                                        class="text-blue-600 hover:text-blue-800 transition-colors text-2xl">
+                                        <i class="fas fa-eye "></i>
+                                    </button>
+                                    <button onclick="editData(2)"
+                                        class="text-green-600 hover:text-green-800 transition-colors text-2xl">
+                                        <i class="fas fa-edit "></i>
+                                    </button>
+                                    <button onclick="deleteData(2)"
+                                        class="text-red-600 hover:text-red-800 transition-colors text-2xl">
+                                        <i class="fas fa-trash "></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+                <div class="text-lg text-gray-700">
+                    Showing 1 to 2 of 2 entries
+                </div>
+                <div class="flex gap-2">
+                    <button id="prev-btn" class="px-3 py-1 border border-gray-300 rounded text-lg text-gray-500 bg-gray-100 cursor-not-allowed" disabled>
+                        Previous
+                    </button>
+                    <button class="px-3 py-1 border border-blue-500 bg-blue-500 text-white rounded text-lg">
+                        1
+                    </button>
+                    <button id="next-btn" class="px-3 py-1 border border-gray-300 rounded text-lg text-gray-500 bg-gray-100 cursor-not-allowed" disabled>
+                        Next
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div> 
+<div class="container mx-auto p-4">
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div>
+                <div class="mb-4 w-full h-52 flex items-center justify-center ">
+                    <div class="mb-4 w-full h-48  flex items-center justify-center">
+                        <img src="<?php echo base_url('assets/img/swafoto.png'); ?>" alt="Foto Diri" class="max-h-full">
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="block text-sm font-medium text-gray-700">Foto Diri</label>
+                    <div class="flex items-center">
+                        <input type="file" id="foto_diri" name="foto_diri" class="hidden" accept="image/*">
+                        <label for="foto_diri" class="px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-50 cursor-pointer flex-grow hover:bg-gray-100 transition-colors">
+                            <span id="foto_diri_label">No file selected</span>
+                        </label>
+                    </div>
+                    <div class="flex gap-1">
+                    <button type="button" id="preview_foto_btn" class="  px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors">Preview KTP</button>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="mb-4 w-full h-52 flex items-center justify-center ">
+                    <div class="mb-4 w-full h-48 flex items-center justify-center">
+                        <img src="<?php echo base_url('assets/img/ktp.png'); ?>" alt="Foto Diri" class="max-h-full">
+                    </div>
+
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="block text-sm font-medium text-gray-700">Foto KTP</label>
+                    <div class="flex items-center">
+                        <input type="file" id="foto_ktp" name="foto_ktp" class="hidden" accept="image/*">
+                        <label for="foto_ktp" class="px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-50 cursor-pointer flex-grow hover:bg-gray-100 transition-colors">
+                            <span id="foto_ktp_label">No file selected</span>
+                        </label>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" id="preview_ktp_btn" class="px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors">Preview KTP</button>
+                        <button type="button" id="scan_ktp_btn" class="px-4 py-2 bg-green-500 text-white rounded-md text-sm hover:bg-green-600 transition-colors">Scan & Isi Otomatis</button>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label for="nik" class="block text-sm font-medium text-gray-700">NIK (Isi Sesuai KTP)</label>
+                <input type="text" id="nik" name="nik" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+            </div>
+
+            <div>
+                <label for="nama" class="block text-sm font-medium text-gray-700">Nama Lengkap (Isi Sesuai KTP)</label>
+                <input type="text" id="nama" name="nama" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+            </div>
+
+            <div>
+                <label for="no_hp" class="block text-sm font-medium text-gray-700">No Handphone</label>
+                <input type="tel" id="no_hp" name="no_hp" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+            </div>
+
+            <div>
+                <label for="tempat_lahir" class="block text-sm font-medium text-gray-700">Tempat Lahir (Isi Sesuai KTP)</label>
+                <input type="text" id="tempat_lahir" name="tempat_lahir" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+            </div>
+
+            <div>
+                <label for="tanggal_lahir" class="block text-sm font-medium text-gray-700">Tanggal Lahir (Isi Sesuai KTP)</label>
+                <input type="date" id="tanggal_lahir" name="tanggal_lahir" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+            </div>
+
+            <div>
+                <label for="jenis_kelamin" class="block text-sm font-medium text-gray-700">Jenis Kelamin (Isi Sesuai KTP)</label>
+                <select id="jenis_kelamin" name="jenis_kelamin" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                    <option value="">Pilih Jenis Kelamin</option>
+                    <option value="Laki-laki">Laki-laki</option>
+                    <option value="Perempuan">Perempuan</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="gol_darah" class="block text-sm font-medium text-gray-700">Golongan Darah</label>
+                <select id="gol_darah" name="gol_darah" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                    <option value="">Pilih Golongan Darah</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="AB">AB</option>
+                    <option value="O">O</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="agama" class="block text-sm font-medium text-gray-700">Agama</label>
+                <select id="agama" name="agama" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                    <option value="">Pilih Agama</option>
+                    <option value="Islam">Islam</option>
+                    <option value="Kristen">Kristen</option>
+                    <option value="Katolik">Katolik</option>
+                    <option value="Hindu">Hindu</option>
+                    <option value="Buddha">Buddha</option>
+                    <option value="Konghucu">Konghucu</option>
+                </select>
+            </div>
+
+            <!-- Address Section -->
+            <div>
+                <label for="provinsi" class="block text-sm font-medium text-gray-700">Provinsi Asal (Isi Sesuai KTP)</label>
+                <select id="provinsi" name="provinsi" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                    <option value="">Pilih Provinsi</option>
+                    <option value="51">Bali</option>
+                    <option value="36">Jawa Barat</option>
+                    <option value="35">Jawa Timur</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="kabupaten" class="block text-sm font-medium text-gray-700">Kabupaten/Kota Asal (Isi Sesuai KTP)</label>
+                <select id="kabupaten" name="kabupaten" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                    <option value="">Pilih Kabupaten/Kota</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="kecamatan" class="block text-sm font-medium text-gray-700">Kecamatan Asal (Isi Sesuai KTP)</label>
+                <select id="kecamatan" name="kecamatan" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                    <option value="">Pilih Kecamatan</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="kelurahan" class="block text-sm font-medium text-gray-700">Kelurahan Asal (Isi Sesuai KTP)</label>
+                <select id="kelurahan" name="kelurahan" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                    <option value="">Pilih Kelurahan</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="rt" class="block text-sm font-medium text-gray-700">RT</label>
+                <input type="text" id="rt" name="rt" placeholder="Contoh: 001" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+            </div>
+
+            <div>
+                <label for="rw" class="block text-sm font-medium text-gray-700">RW</label>
+                <input type="text" id="rw" name="rw" placeholder="Contoh: 002" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+            </div>
+
+            <div class="col-span-full">
+                <label for="alamat_asal" class="block text-sm font-medium text-gray-700">Alamat Asal (Isi Sesuai KTP)</label>
+                <textarea id="alamat_asal" name="alamat_asal" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
+            </div>
+
+            <!-- Map Section -->
+            <div class="col-span-full mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Lokasi pada Peta</label>
+                <div id="map" class="h-96 w-full rounded-lg border border-gray-300"></div>
+                <div class="flex justify-end mt-2">
+                    <button type="button" id="center_map_btn" class="px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors">Temukan Lokasi Saya</button>
+                </div>
+            </div>
+
+            <div>
+                <label for="latitude" class="block text-sm font-medium text-gray-700">Latitude</label>
+                <input type="text" id="latitude" name="latitude" value="-8.8007277" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+            </div>
+
+            <div>
+                <label for="longitude" class="block text-sm font-medium text-gray-700">Longitude</label>
+                <input type="text" id="longitude" name="longitude" value="115.1626822" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+            </div>
+
+            <div class="col-span-full">
+                <label for="tujuan" class="block text-sm font-medium text-gray-700">Tujuan</label>
+                <textarea id="tujuan" name="tujuan" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
+            </div>
+
+            <div>
+                <label for="tanggal_masuk" class="block text-sm font-medium text-gray-700">Tanggal Masuk</label>
+                <input type="date" id="tanggal_masuk" name="tanggal_masuk" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+            </div>
+
+            <div>
+                <label for="tanggal_keluar" class="block text-sm font-medium text-gray-700">Tanggal Keluar (Tidak Wajib)</label>
+                <input type="date" id="tanggal_keluar" name="tanggal_keluar" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+            </div>
+
+            <div>
+                <label for="kepala_lingkungan" class="block text-sm font-medium text-gray-700">Kepala Lingkungan</label>
+                <select id="kepala_lingkungan" name="kepala_lingkungan" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                    <option value="">Pilih Kepala Lingkungan</option>
+                </select>
+            </div>
+
+
+            <div>
+                <label for="wilayah" class="block text-sm font-medium text-gray-700">Wilayah</label>
+                <select id="wilayah" name="wilayah" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2">
+                    <option value="">Pilih Wilayah</option>
+                </select>
+            </div>
+
+            <div class="col-span-full flex justify-end gap-2 mt-4">
+                <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">Simpan</button>
+                <button type="button" class="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors">Kembali</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize map
+        const defaultLat = document.getElementById('latitude').value || -8.8007277;
+        const defaultLng = document.getElementById('longitude').value || 115.1626822;
+
+        const map = L.map('map').setView([defaultLat, defaultLng], 13);
+
+        // Add the OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add a marker at the default position
+        let marker = L.marker([defaultLat, defaultLng], {
+            draggable: true
+        }).addTo(map);
+
+        // Update the form fields when the marker is dragged
+        marker.on('dragend', function(event) {
+            const position = marker.getLatLng();
+            document.getElementById('latitude').value = position.lat.toFixed(7);
+            document.getElementById('longitude').value = position.lng.toFixed(7);
+        });
+
+        // Update the marker when clicking on the map
+        map.on('click', function(event) {
+            marker.setLatLng(event.latlng);
+            document.getElementById('latitude').value = event.latlng.lat.toFixed(7);
+            document.getElementById('longitude').value = event.latlng.lng.toFixed(7);
+        });
+
+        // Center map to current location when button is clicked
+        document.getElementById('center_map_btn').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+
+                    map.setView([lat, lng], 15);
+                    marker.setLatLng([lat, lng]);
+
+                    document.getElementById('latitude').value = lat.toFixed(7);
+                    document.getElementById('longitude').value = lng.toFixed(7);
+                }, function(error) {
+                    console.error('Error getting location:', error.message);
+                    alert('Tidak dapat menemukan lokasi Anda. Silakan coba lagi atau pilih lokasi secara manual.');
+                });
+            } else {
+                alert('Geolocation tidak didukung oleh browser Anda.');
+            }
+        });
+
+        // Handle file uploads and previews
+        document.getElementById('foto_diri').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('foto_diri_label').textContent = file.name;
+                previewImage('foto_diri', 'swafoto_preview', 'swafoto_placeholder');
+            }
+        });
+
+        document.getElementById('foto_ktp').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('foto_ktp_label').textContent = file.name;
+                previewImage('foto_ktp', 'ktp_preview', 'ktp_placeholder');
+            }
+        });
+
+        document.getElementById('preview_foto_btn').addEventListener('click', function() {
+            document.getElementById('foto_diri').click();
+        });
+
+        document.getElementById('preview_ktp_btn').addEventListener('click', function() {
+            document.getElementById('foto_ktp').click();
+        });
+
+        // Function to preview images
+        function previewImage(inputId, previewId, placeholderId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+            const placeholder = document.getElementById(placeholderId);
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Cascading dropdowns for location
+        document.getElementById('provinsi').addEventListener('change', function() {
+            // Populate kabupaten based on selected province
+            const provinsiId = this.value;
+
+            // Clear dependent dropdowns
+            clearDropdown('kabupaten');
+            clearDropdown('kecamatan');
+            clearDropdown('kelurahan');
+
+            if (provinsiId) {
+                // Here you would typically make an AJAX request to get kabupaten data
+                // For demo purposes, we'll populate with dummy data for Bali
+                if (provinsiId === '51') { // Bali
+                    const kabupatens = [{
+                            id: '5101',
+                            name: 'Denpasar'
+                        },
+                        {
+                            id: '5102',
+                            name: 'Badung'
+                        },
+                        {
+                            id: '5103',
+                            name: 'Gianyar'
+                        },
+                        {
+                            id: '5104',
+                            name: 'Klungkung'
+                        }
+                    ];
+
+                    populateDropdown('kabupaten', kabupatens);
+                }
+            }
+        });
+
+        document.getElementById('kabupaten').addEventListener('change', function() {
+            // Populate kecamatan based on selected kabupaten
+            const kabupatenId = this.value;
+
+            clearDropdown('kecamatan');
+            clearDropdown('kelurahan');
+
+            if (kabupatenId) {
+                // For demo purposes with dummy data
+                if (kabupatenId === '5102') { // Badung
+                    const kecamatans = [{
+                            id: '510201',
+                            name: 'Kuta'
+                        },
+                        {
+                            id: '510202',
+                            name: 'Mengwi'
+                        },
+                        {
+                            id: '510203',
+                            name: 'Abiansemal'
+                        }
+                    ];
+
+                    populateDropdown('kecamatan', kecamatans);
+                }
+            }
+        });
+
+        document.getElementById('kecamatan').addEventListener('change', function() {
+            // Populate kelurahan based on selected kecamatan
+            const kecamatanId = this.value;
+
+            clearDropdown('kelurahan');
+
+            if (kecamatanId) {
+                // For demo purposes with dummy data
+                if (kecamatanId === '510201') { // Kuta
+                    const kelurahans = [{
+                            id: '5102011',
+                            name: 'Kuta'
+                        },
+                        {
+                            id: '5102012',
+                            name: 'Legian'
+                        },
+                        {
+                            id: '5102013',
+                            name: 'Seminyak'
+                        }
+                    ];
+
+                    populateDropdown('kelurahan', kelurahans);
+                }
+            }
+        });
+
+        // Helper functions for dropdown manipulation
+        function clearDropdown(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            dropdown.innerHTML = '<option value="">Pilih ' + dropdown.labels[0].textContent.split('(')[0].trim() + '</option>';
+        }
+
+        function populateDropdown(dropdownId, items) {
+            const dropdown = document.getElementById(dropdownId);
+
+            items.forEach(function(item) {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = item.name;
+                dropdown.appendChild(option);
+            });
+        }
+
+
+    });
+</script>

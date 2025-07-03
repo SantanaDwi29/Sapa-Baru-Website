@@ -1,0 +1,239 @@
+// Fungsi global untuk update koordinat
+function updateCoordinates(lat, lng) {
+    // Update input visible
+    document.getElementById('latitude').value = lat.toFixed(6);
+    document.getElementById('longitude').value = lng.toFixed(6);
+    
+    // Update input hidden sebagai backup
+    document.getElementById('latitude_hidden').value = lat.toFixed(6);
+    document.getElementById('longitude_hidden').value = lng.toFixed(6);
+}
+
+// Variabel global untuk map
+let map;
+let marker;
+
+function initializeMap() {
+    // Check if Leaflet is available
+    if (typeof L === 'undefined') {
+        console.warn('Leaflet library not loaded');
+        return;
+    }
+
+    if (map) {
+        map.remove(); // Remove existing map
+    }
+
+    // Initialize map with default coordinates (Jakarta)
+    map = L.map('map').setView([-6.2088, 106.8456], 13);
+
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Event listener untuk klik pada map
+    map.on('click', function(e) {
+        if (marker) {
+            map.removeLayer(marker);
+        }
+
+        marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+
+        // Update coordinates menggunakan fungsi global
+        updateCoordinates(e.latlng.lat, e.latlng.lng);
+
+        // Reverse geocoding to get address
+        reverseGeocode(e.latlng.lat, e.latlng.lng);
+    });
+}
+
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        // Tampilkan loading indicator (opsional)
+        console.log('Mencari lokasi...');
+        
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            console.log('Lokasi ditemukan:', lat, lng);
+
+            // Update map view
+            if (map) {
+                map.setView([lat, lng], 15);
+
+                // Hapus marker lama jika ada
+                if (marker) {
+                    map.removeLayer(marker);
+                }
+
+                // Tambah marker baru
+                marker = L.marker([lat, lng]).addTo(map);
+
+                // Update koordinat menggunakan fungsi global
+                updateCoordinates(lat, lng);
+
+                // Reverse geocoding to get address
+                reverseGeocode(lat, lng);
+            } else {
+                console.error('Map belum diinisialisasi');
+            }
+        }, function(error) {
+            console.error('Geolocation error:', error);
+            let errorMessage = '';
+            
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage = "Izin akses lokasi ditolak. Silakan izinkan akses lokasi di browser Anda.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage = "Informasi lokasi tidak tersedia.";
+                    break;
+                case error.TIMEOUT:
+                    errorMessage = "Waktu pencarian lokasi habis.";
+                    break;
+                default:
+                    errorMessage = "Terjadi kesalahan yang tidak diketahui.";
+                    break;
+            }
+            alert(errorMessage);
+        }, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 300000
+        });
+    } else {
+        alert("Geolocation tidak didukung oleh browser ini.");
+    }
+}
+
+function reverseGeocode(lat, lng) {
+    console.log('Mencari alamat untuk koordinat:', lat, lng);
+    
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Data alamat:', data);
+            
+            if (data && data.display_name) {
+                document.getElementById('tempat_tujuan').value = data.display_name;
+            } else {
+                console.warn('Alamat tidak ditemukan');
+                document.getElementById('tempat_tujuan').value = `Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching address:', error);
+            document.getElementById('tempat_tujuan').value = `Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        });
+}
+
+// Fungsi untuk membuka modal
+function openModal() {
+    const modal = document.getElementById('modal-overlay');
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    // Delay sedikit untuk memastikan modal sudah terlihat sebelum inisialisasi map
+    setTimeout(() => {
+        initializeMap();
+    }, 200);
+}
+
+function closeModal() {
+    const modal = document.getElementById('modal-overlay');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+
+    // Reset form
+    document.getElementById('pendatang-form').reset();
+
+    // Clear coordinates
+    document.getElementById('latitude').value = '';
+    document.getElementById('longitude').value = '';
+    document.getElementById('latitude_hidden').value = '';
+    document.getElementById('longitude_hidden').value = '';
+    document.getElementById('tempat_tujuan').value = '';
+
+    // Destroy map if exists
+    if (map) {
+        map.remove();
+        map = null;
+        marker = null;
+    }
+}
+
+// Event listener untuk DOM loaded
+document.addEventListener("DOMContentLoaded", function() {
+    // Kode existing untuk provinsi/kabupaten...
+    const provinsiSelect = document.getElementById("provinsi");
+    const kabupatenSelect = document.getElementById("kabupaten");
+    const kecamatanSelect = document.getElementById("kecamatan");
+    const kelurahanSelect = document.getElementById("kelurahan");
+
+    // Ambil data provinsi
+    fetch("https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json")
+        .then(res => res.json())
+        .then(data => {
+            data.forEach(provinsi => {
+                provinsiSelect.innerHTML += `<option value="${provinsi.id}">${provinsi.name}</option>`;
+            });
+        });
+
+    // Event saat provinsi dipilih
+    provinsiSelect.addEventListener("change", function() {
+        const provinsiId = this.value;
+        kabupatenSelect.innerHTML = `<option value="">Pilih Kabupaten/Kota</option>`;
+        kecamatanSelect.innerHTML = `<option value="">Pilih Kecamatan</option>`;
+        kelurahanSelect.innerHTML = `<option value="">Pilih Kelurahan</option>`;
+
+        if (provinsiId) {
+            fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provinsiId}.json`)
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(kabupaten => {
+                        kabupatenSelect.innerHTML += `<option value="${kabupaten.id}">${kabupaten.name}</option>`;
+                    });
+                });
+        }
+    });
+
+    // Event saat kabupaten dipilih
+    kabupatenSelect.addEventListener("change", function() {
+        const kabupatenId = this.value;
+        kecamatanSelect.innerHTML = `<option value="">Pilih Kecamatan</option>`;
+        kelurahanSelect.innerHTML = `<option value="">Pilih Kelurahan</option>`;
+
+        if (kabupatenId) {
+            fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/districts/${kabupatenId}.json`)
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(kecamatan => {
+                        kecamatanSelect.innerHTML += `<option value="${kecamatan.id}">${kecamatan.name}</option>`;
+                    });
+                });
+        }
+    });
+
+    // Event saat kecamatan dipilih
+    kecamatanSelect.addEventListener("change", function() {
+        const kecamatanId = this.value;
+        kelurahanSelect.innerHTML = `<option value="">Pilih Kelurahan</option>`;
+
+        if (kecamatanId) {
+            fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/villages/${kecamatanId}.json`)
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(kelurahan => {
+                        kelurahanSelect.innerHTML += `<option value="${kelurahan.id}">${kelurahan.name}</option>`;
+                    });
+                });
+            }
+        });
+    });
