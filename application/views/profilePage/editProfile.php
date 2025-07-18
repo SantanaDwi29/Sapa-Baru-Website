@@ -1,146 +1,87 @@
 <?php
-$NamaLengkap = isset($profile) ? $profile->NamaLengkap : $this->session->userdata('NamaLengkap');
-$NIK = isset($profile) ? $profile->NIK : $this->session->userdata('NIK');
-$Alamat = isset($profile) ? $profile->Alamat : '';
-$Telp = isset($profile) ? $profile->Telp : '';
-$Email = isset($profile) ? $profile->Email : '';
-$JenisAkun = isset($profile) ? $profile->JenisAkun : $this->session->userdata('JenisAkun');
+
+$NamaLengkap = isset($profile->NamaLengkap) ? $profile->NamaLengkap : '';
+    $NIK = isset($profile->NIK) ? $profile->NIK : '';
+    $Alamat = isset($profile->Alamat) ? $profile->Alamat : '';
+    $Telp = isset($profile->Telp) ? $profile->Telp : '';
+    $Email = isset($profile->Email) ? $profile->Email : '';
+    $JenisAkun = isset($profile->JenisAkun) ? $profile->JenisAkun : '';
+
+    $latitude = isset($profile->Latitude_daftar) ? $profile->Latitude_daftar : '';
+    $longitude = isset($profile->Longitude_daftar) ? $profile->Longitude_daftar : '';
 ?>
+
 
 <div class="container mx-auto px-4 py-8">
     <div class="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
         <div class="bg-gradient-to-br from-slate-900 to-indigo-900 px-8 py-6">
             <div class="flex items-center justify-between">
-                <h2 class="text-2xl font-bold text-white flex items-center">
-                    <i class="fas fa-edit mr-3"></i>Edit Profile
-                </h2>
-                <button onclick="window.location.href='<?= base_url('profile') ?>'"
-                    class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg backdrop-blur-sm transition-all flex items-center">
-                    <i class="fas fa-arrow-left mr-2"></i> Kembali
-                </button>
+                <h2 class="text-2xl font-bold text-white flex items-center"><i class="fas fa-edit mr-3"></i>Edit Profile</h2>
+                <a href="<?= base_url('profile') ?>" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg"><i class="fas fa-arrow-left mr-2"></i> Kembali</a>
             </div>
         </div>
 
         <div class="p-6 md:p-8">
-            <?php if ($this->session->flashdata('error')): ?>
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                    <i class="fas fa-exclamation-circle mr-2"></i>
-                    <?= $this->session->flashdata('error') ?>
-                </div>
-            <?php endif; ?>
-
             <?php if ($this->session->flashdata('success')): ?>
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
-                    <i class="fas fa-check-circle mr-2"></i>
-                    <?= $this->session->flashdata('success') ?>
-                </div>
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert"><p><?= $this->session->flashdata('success') ?></p></div>
+            <?php endif; ?>
+            <?php if ($this->session->flashdata('error')): ?>
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert"><p><?= $this->session->flashdata('error') ?></p></div>
             <?php endif; ?>
 
-            <form action="<?= base_url('profile/save') ?>" method="POST" class="space-y-6">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <form id="editProfileForm" action="<?= base_url('profile/save') ?>" method="POST" class="space-y-6">
+                <input type="hidden" name="latitude_daftar" id="latitude_input" value="<?= htmlspecialchars($latitude) ?>">
+                <input type="hidden" name="longitude_daftar" id="longitude_input" value="<?= htmlspecialchars($longitude) ?>">
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
                     <div class="space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-800 flex items-center border-b pb-3">
-                            <i class="fas fa-user-circle mr-3 text-blue-600"></i>Informasi Pribadi
-                        </h3>
-
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">
-                                <i class="fas fa-id-card mr-2 text-blue-500"></i>NIK
-                            </label>
-                            <input type="text" value="<?= htmlspecialchars($NIK) ?>"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600"
-                                readonly>
-                            <p class="text-xs text-gray-500">NIK tidak dapat diubah</p>
+                        <h3 class="text-xl font-semibold text-gray-800 border-b pb-3"><i class="fas fa-user-circle mr-3 text-blue-600"></i>Informasi Pribadi</h3>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">NIK</label>
+                            <input type="text" value="<?= htmlspecialchars($NIK) ?>" class="mt-1 w-full px-4 py-3 border rounded-lg bg-gray-100" readonly>
                         </div>
-
-                        <!-- Nama Lengkap -->
-                        <div class="space-y-2">
-                            <label for="namaLengkap" class="block text-sm font-medium text-gray-700">
-                                <i class="fas fa-user mr-2 text-green-500"></i>Nama Lengkap <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" id="namaLengkap" name="namaLengkap"
-                                value="<?= htmlspecialchars($NamaLengkap) ?>"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                placeholder="Masukkan nama lengkap" required>
+                        <div>
+                            <label for="namaLengkap" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                            <input type="text" id="namaLengkap" name="namaLengkap" value="<?= htmlspecialchars($NamaLengkap) ?>" class="mt-1 w-full px-4 py-3 border rounded-lg" required>
                         </div>
-
-                        <!-- Alamat -->
-                        <div class="space-y-2">
-                            <label for="alamat" class="block text-sm font-medium text-gray-700">
-                                <i class="fas fa-map-marker-alt mr-2 text-red-500"></i>Alamat <span class="text-red-500">*</span>
-                            </label>
-                            <textarea id="alamat" name="alamat" rows="4"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                placeholder="Masukkan alamat lengkap" required><?= htmlspecialchars($Alamat) ?></textarea>
-                        </div>
-
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">
-                                <i class="fas fa-user-tag mr-2 text-indigo-500"></i>Jenis Akun
-                            </label>
-                            <input type="text" value="<?= htmlspecialchars($JenisAkun) ?>"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600"
-                                readonly>
-                            <p class="text-xs text-gray-500">Jenis akun tidak dapat diubah</p>
+                        <div>
+                            <label for="alamat" class="block text-sm font-medium text-gray-700">Alamat</label>
+                            <textarea id="alamat" name="alamat" rows="4" class="mt-1 w-full px-4 py-3 border rounded-lg" required><?= htmlspecialchars($Alamat) ?></textarea>
+                            <button type="button" id="search-address-btn" class="mt-2 px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                                <i class="fas fa-search-location mr-2"></i>Cari Alamat di Peta
+                            </button>
                         </div>
                     </div>
 
                     <div class="space-y-6">
-                        <h3 class="text-xl font-semibold text-gray-800 flex items-center border-b pb-3">
-                            <i class="fas fa-address-book mr-3 text-green-600"></i>Informasi Kontak
-                        </h3>
-
-                        <div class="space-y-2">
-                            <label for="telp" class="block text-sm font-medium text-gray-700">
-                                <i class="fas fa-phone mr-2 text-purple-500"></i>Telepon <span class="text-red-500">*</span>
-                            </label>
-                            <input type="tel" id="telp" name="telp"
-                                value="<?= htmlspecialchars($Telp) ?>"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                placeholder="Contoh: 08123456789" required>
-                            <p class="text-xs text-gray-500">Masukkan nomor telepon yang aktif</p>
+                        <h3 class="text-xl font-semibold text-gray-800 border-b pb-3"><i class="fas fa-address-book mr-3 text-green-600"></i>Informasi Kontak</h3>
+                        <div>
+                            <label for="telp" class="block text-sm font-medium text-gray-700">Telepon</label>
+                            <input type="tel" id="telp" name="telp" value="<?= htmlspecialchars($Telp) ?>" class="mt-1 w-full px-4 py-3 border rounded-lg" required>
                         </div>
-
-                        <div class="space-y-2">
-                            <label for="email" class="block text-sm font-medium text-gray-700">
-                                <i class="fas fa-envelope mr-2 text-orange-500"></i>Email <span class="text-red-500">*</span>
-                            </label>
-                            <input type="email" id="email" name="email"
-                                value="<?= htmlspecialchars($Email) ?>"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                placeholder="contoh@email.com" required>
-                            <p class="text-xs text-gray-500">Email akan digunakan untuk notifikasi</p>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" id="email" name="email" value="<?= htmlspecialchars($Email) ?>" class="mt-1 w-full px-4 py-3 border rounded-lg" required>
                         </div>
-
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <h4 class="font-medium text-blue-800 mb-2 flex items-center">
-                                <i class="fas fa-info-circle mr-2"></i>Informasi Penting
-                            </h4>
-                            <ul class="text-sm text-blue-700 space-y-1">
-                                <li>• Pastikan data yang dimasukkan benar dan valid</li>
-                                <li>• Email harus unik dan belum digunakan pengguna lain</li>
-                                <li>• Nomor telepon harus dalam format yang benar</li>
-                                <li>• Data yang telah disimpan dapat diubah kembali kapan saja</li>
-                            </ul>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Jenis Akun</label>
+                            <input type="text" value="<?= htmlspecialchars($JenisAkun) ?>" class="mt-1 w-full px-4 py-3 border rounded-lg bg-gray-100" readonly>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
-                    <button type="submit"
-                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center">
+                <div class="pt-6 border-t col-span-1 lg:col-span-2">
+                    <h3 class="text-xl font-semibold text-gray-800"><i class="fas fa-map-marked-alt mr-3 text-purple-600"></i>Tentukan Lokasi di Peta</h3>
+                    <p class="text-sm text-gray-500 mt-1 mb-4">Klik tombol "Cari Alamat" atau klik langsung pada peta untuk menentukan lokasi.</p>
+                    <div id="map-edit" style="height: 400px; width: 100%; border-radius: 0.5rem; z-index:0;"></div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg flex items-center justify-center">
                         <i class="fas fa-save mr-2"></i>Simpan Perubahan
                     </button>
-
-                    <button type="button"
-                        onclick="window.location.href='<?= base_url('profile') ?>'"
-                        class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center">
-                        <i class="fas fa-times mr-2"></i>Batal
-                    </button>
-
-                    <button type="reset"
-                        class="sm:flex-none bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center">
-                        <i class="fas fa-undo mr-2"></i>Reset
+                    <button type="reset" class="sm:flex-none bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-undo mr-2"></i>Reset Form
                     </button>
                 </div>
             </form>
@@ -149,78 +90,82 @@ $JenisAkun = isset($profile) ? $profile->JenisAkun : $this->session->userdata('J
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.querySelector('form');
-        const telp = document.getElementById('telp');
-        const email = document.getElementById('email');
-        const resetButton = document.querySelector('button[type="reset"]');
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('editProfileForm');
+    const resetButton = form.querySelector('button[type="reset"]');
 
-        if (telp) {
-            telp.addEventListener('input', function() {
-                let value = this.value.replace(/\D/g, '');
-                if (value.startsWith('62')) {
-                    value = '0' + value.substring(2);
-                }
-                this.value = value;
-                if (value.length < 10 || value.length > 15) {
-                    this.setCustomValidity('Nomor telepon harus 10-15 digit');
-                } else {
-                    this.setCustomValidity('');
-                }
-            });
-        }
 
-        if (email) {
-            email.addEventListener('input', function() {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(this.value)) {
-                    this.setCustomValidity('Format email tidak valid');
-                } else {
-                    this.setCustomValidity('');
-                }
-            });
-        }
+    const latField = document.getElementById('latitude_input');
+    const lngField = document.getElementById('longitude_input');
+    const alamatInput = document.getElementById('alamat');
+    
 
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
+    const initialLat = latField.value ? parseFloat(latField.value) : -8.650000;
+    const initialLng = lngField.value ? parseFloat(lngField.value) : 115.216667;
 
-                Swal.fire({
-                    title: 'Simpan Perubahan?',
-                    text: "Apakah Anda yakin ingin menyimpan data profil?",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Ya, Simpan!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit();
-                    }
-                });
-            });
-        }
+    window.mapInstance = L.map('map-edit').setView([initialLat, initialLng], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(window.mapInstance);
+    window.markerInstance = L.marker([initialLat, initialLng], { draggable: true }).addTo(window.mapInstance);
 
-        if (resetButton) {
-            resetButton.addEventListener('click', function(e) {
-                e.preventDefault();
+    function updateInputs(latlng) {
+        latField.value = latlng.lat.toFixed(8);
+        lngField.value = latlng.lng.toFixed(8);
+    }
 
-                Swal.fire({
-                    title: 'Reset Form?',
-                    text: "Semua perubahan yang belum disimpan akan hilang. Anda yakin?",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Ya, Reset!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.reset();
-                    }
-                });
-            });
-        }
+    window.markerInstance.on('dragend', e => updateInputs(e.target.getLatLng()));
+    window.mapInstance.on('click', e => {
+        window.markerInstance.setLatLng(e.latlng);
+        updateInputs(e.latlng);
     });
+
+    async function geocodeAddress() {
+        const address = alamatInput.value;
+        if (address.length < 5) {
+            Swal.fire('Alamat Terlalu Pendek', 'Ketik alamat yang lebih spesifik.', 'warning');
+            return;
+        }
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&countrycodes=ID`;
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data && data.length > 0) {
+            const newPosition = L.latLng(data[0].lat, data[0].lon);
+            window.mapInstance.flyTo(newPosition, 16);
+            window.markerInstance.setLatLng(newPosition);
+            updateInputs(newPosition);
+        } else {
+            Swal.fire('Gagal', 'Alamat tidak dapat ditemukan di peta.', 'error');
+        }
+    }
+    document.getElementById('search-address-btn').addEventListener('click', geocodeAddress);
+
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        updateInputs(window.markerInstance.getLatLng());
+        
+        Swal.fire({
+            title: 'Simpan Perubahan?', text: "Data profil Anda akan diperbarui.", icon: 'question',
+            showCancelButton: true, confirmButtonText: 'Ya, Simpan!', cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) form.submit();
+        });
+    });
+
+    resetButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        Swal.fire({
+            title: 'Reset Form?', text: "Semua perubahan akan dibatalkan.", icon: 'warning',
+            showCancelButton: true, confirmButtonText: 'Ya, Reset!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.reset();
+
+                window.mapInstance.setView([initialLat, initialLng], 14);
+                window.markerInstance.setLatLng([initialLat, initialLng]);
+                updateInputs({ lat: initialLat, lng: initialLng });
+            }
+        });
+    });
+});
 </script>

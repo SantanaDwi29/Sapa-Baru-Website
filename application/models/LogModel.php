@@ -30,17 +30,4 @@ class LogModel extends CI_Model
         return $this->db->get()->result();
     }
 
-    /**
-     * CONTOH FUNGSI LAIN DI MASA DEPAN
-     * Anda bisa menambahkan fungsi log lain di sini jika dibutuhkan.
-     * Misalnya, untuk melihat riwayat login pengguna.
-     *
-     * public function get_riwayat_login($limit = 50)
-     * {
-     * $this->db->from('tb_login_attempts'); // Asumsi ada tabel untuk mencatat upaya login
-     * $this->db->order_by('attempt_time', 'DESC');
-     * $this->db->limit($limit);
-     * return $this->db->get()->result();
-     * }
-     */
 }

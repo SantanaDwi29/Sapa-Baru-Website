@@ -43,7 +43,7 @@ if ($JenisAkun == 'Admin') {
                             class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Masukkan email yang valid">
                     </div>
-                    
+
                     <div class="md:col-span-2 space-y-1">
                         <label for="alamat" class="block text-lg font-medium text-gray-700">Alamat <span class="text-red-500">*</span></label>
                         <textarea name="alamat" id="alamat" required rows="3"
@@ -56,7 +56,7 @@ if ($JenisAkun == 'Admin') {
                         <input type="password" name="password" id="password"
                             class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Isi untuk mengubah password">
-                         <p class="text-sm text-gray-500 mt-1">Kosongkan jika tidak ingin mengubah password.</p>
+                        <p class="text-sm text-gray-500 mt-1">Kosongkan jika tidak ingin mengubah password.</p>
                     </div>
 
                     <div class="space-y-1">
@@ -84,7 +84,7 @@ if ($JenisAkun == 'Admin') {
         function editUser(id) {
             document.getElementById('form-title').textContent = 'Form Edit Data Kepala Lingkungan';
 
-            fetch(`<?= site_url('Kaling/get/') ?>${id}`) 
+            fetch(`<?= site_url('Kaling/get/') ?>${id}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
@@ -93,13 +93,13 @@ if ($JenisAkun == 'Admin') {
                 })
                 .then(data => {
                     document.getElementById('id_daftar').value = data.id_daftar;
-                    document.getElementById('namaLengkap').value = data.NamaKaling; 
+                    document.getElementById('namaLengkap').value = data.NamaKaling;
                     document.getElementById('nik').value = data.NIK;
                     document.getElementById('telp').value = data.Telp;
                     document.getElementById('email').value = data.Email;
                     document.getElementById('alamat').value = data.Alamat;
                     document.getElementById('jenisAkun').value = data.JenisAkun;
-                    document.getElementById('password').value = ''; 
+                    document.getElementById('password').value = '';
 
                     document.getElementById('kaling-form').scrollIntoView({
                         behavior: 'smooth',
@@ -141,17 +141,17 @@ if ($JenisAkun == 'Admin') {
             });
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const entriesSelect = document.getElementById('entries-select');
             const statusFilter = document.getElementById('statusFilter');
             const searchInput = document.getElementById('searchInput');
             const tableBody = document.getElementById('tableBody');
             const entriesInfo = document.getElementById('entries-info');
             const paginationButtons = document.getElementById('pagination-buttons');
-            
+
             if (!tableBody) {
                 console.log("Elemen tabel tidak ditemukan, script filter tidak dijalankan.");
-                return; 
+                return;
             }
 
             const allRows = Array.from(tableBody.querySelectorAll('tr'));
@@ -173,7 +173,7 @@ if ($JenisAkun == 'Admin') {
 
                     const matchesSearch = nama.includes(searchTerm) || nik.includes(searchTerm);
                     const matchesStatus = statusValue === "" || status === statusValue;
-                    
+
                     return matchesSearch && matchesStatus;
                 });
 
@@ -185,7 +185,7 @@ if ($JenisAkun == 'Admin') {
 
                 const startIndex = (currentPage - 1) * entriesPerPage;
                 const endIndex = startIndex + entriesPerPage;
-                
+
                 const rowsToShow = filteredRows.slice(startIndex, endIndex);
                 rowsToShow.forEach(row => row.style.display = '');
 
@@ -194,7 +194,7 @@ if ($JenisAkun == 'Admin') {
                     const endEntry = Math.min(endIndex, totalEntries);
                     entriesInfo.textContent = `Showing ${startEntry} to ${endEntry} of ${totalEntries} entries`;
                 }
-                
+
                 if (paginationButtons) {
                     renderPaginationButtons(totalPages);
                 }
@@ -202,7 +202,7 @@ if ($JenisAkun == 'Admin') {
 
             function renderPaginationButtons(totalPages) {
                 paginationButtons.innerHTML = '';
-                
+
                 const prevButton = document.createElement('button');
                 prevButton.textContent = 'Previous';
                 prevButton.className = 'px-3 py-1 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400';
@@ -219,10 +219,10 @@ if ($JenisAkun == 'Admin') {
                     const pageButton = document.createElement('button');
                     pageButton.textContent = i;
                     if (i === currentPage) {
-                         pageButton.className = 'px-3 py-1 border border-blue-500 rounded bg-blue-500 text-white';
+                        pageButton.className = 'px-3 py-1 border border-blue-500 rounded bg-blue-500 text-white';
                     } else {
-                         pageButton.className = 'px-3 py-1 border border-gray-300 rounded hover:bg-gray-100';
-                         pageButton.addEventListener('click', () => {
+                        pageButton.className = 'px-3 py-1 border border-gray-300 rounded hover:bg-gray-100';
+                        pageButton.addEventListener('click', () => {
                             currentPage = i;
                             renderTable();
                         });
@@ -242,12 +242,21 @@ if ($JenisAkun == 'Admin') {
                 });
                 paginationButtons.appendChild(nextButton);
             }
-            
-            entriesSelect.addEventListener('change', () => { currentPage = 1; renderTable(); });
-            searchInput.addEventListener('input', () => { currentPage = 1; renderTable(); });
-            statusFilter.addEventListener('change', () => { currentPage = 1; renderTable(); });
 
-           
+            entriesSelect.addEventListener('change', () => {
+                currentPage = 1;
+                renderTable();
+            });
+            searchInput.addEventListener('input', () => {
+                currentPage = 1;
+                renderTable();
+            });
+            statusFilter.addEventListener('change', () => {
+                currentPage = 1;
+                renderTable();
+            });
+
+
             renderTable();
 
             const form = document.getElementById('kaling-form');
@@ -255,9 +264,9 @@ if ($JenisAkun == 'Admin') {
 
             resetButton.addEventListener('click', () => {
                 form.reset();
-                document.getElementById('id_daftar').value = ''; 
+                document.getElementById('id_daftar').value = '';
                 document.getElementById('form-title').textContent = 'Form Tambah Data Kepala Lingkungan';
-                 Swal.fire({
+                Swal.fire({
                     icon: 'info',
                     title: 'Form Direset',
                     text: 'Anda dapat menambahkan data baru.',
@@ -268,139 +277,130 @@ if ($JenisAkun == 'Admin') {
         });
     </script>
     <script>
-      document.addEventListener('DOMContentLoaded', function () {
-    const entriesSelect = document.getElementById('entries-select');
-    const statusFilter = document.getElementById('statusFilter');
-    const searchInput = document.getElementById('searchInput');
-    const tableBody = document.getElementById('tableBody');
-    const allRows = Array.from(tableBody.querySelectorAll('tr'));
-    const entriesInfo = document.getElementById('entries-info');
-    const paginationButtons = document.getElementById('pagination-buttons');
+        document.addEventListener('DOMContentLoaded', function() {
+            const entriesSelect = document.getElementById('entries-select');
+            const statusFilter = document.getElementById('statusFilter');
+            const searchInput = document.getElementById('searchInput');
+            const tableBody = document.getElementById('tableBody');
+            const allRows = Array.from(tableBody.querySelectorAll('tr'));
+            const entriesInfo = document.getElementById('entries-info');
+            const paginationButtons = document.getElementById('pagination-buttons');
 
-    let currentPage = 1;
-    let entriesPerPage = parseInt(entriesSelect.value, 10);
+            let currentPage = 1;
+            let entriesPerPage = parseInt(entriesSelect.value, 10);
 
-    function renderTable() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const statusValue = statusFilter.value;
+            function renderTable() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const statusValue = statusFilter.value;
 
-        // --- BAGIAN INI TELAH DIPERBAIKI ---
-        // Logika filter yang lebih andal menggunakan data-label
-        const filteredRows = allRows.filter(row => {
-            const namaCell = row.querySelector('[data-label="Nama Lengkap"]');
-            const nikCell = row.querySelector('[data-label="NIK"]');
-            const statusCell = row.querySelector('[data-label="Status"] span');
 
-            // Ambil teks hanya jika sel ditemukan, untuk menghindari error
-            const nama = namaCell ? namaCell.textContent.toLowerCase() : '';
-            const nik = nikCell ? nikCell.textContent.toLowerCase() : '';
-            const status = statusCell ? statusCell.textContent.trim() : '';
 
-            const matchesSearch = nama.includes(searchTerm) || nik.includes(searchTerm);
-            const matchesStatus = statusValue === "" || status === statusValue;
-            
-            return matchesSearch && matchesStatus;
-        });
+                const filteredRows = allRows.filter(row => {
+                    const namaCell = row.querySelector('[data-label="Nama Lengkap"]');
+                    const nikCell = row.querySelector('[data-label="NIK"]');
+                    const statusCell = row.querySelector('[data-label="Status"] span');
 
-        // Sembunyikan semua baris terlebih dahulu
-        allRows.forEach(row => row.style.display = 'none');
 
-        // Hitung paginasi berdasarkan data yang sudah difilter
-        const totalEntries = filteredRows.length;
-        const totalPages = Math.ceil(totalEntries / entriesPerPage);
-        currentPage = Math.min(currentPage, totalPages) || 1;
+                    const nama = namaCell ? namaCell.textContent.toLowerCase() : '';
+                    const nik = nikCell ? nikCell.textContent.toLowerCase() : '';
+                    const status = statusCell ? statusCell.textContent.trim() : '';
 
-        const startIndex = (currentPage - 1) * entriesPerPage;
-        const endIndex = startIndex + entriesPerPage;
-        
-        // Tampilkan hanya baris untuk halaman saat ini
-        const rowsToShow = filteredRows.slice(startIndex, endIndex);
-        rowsToShow.forEach(row => row.style.display = '');
+                    const matchesSearch = nama.includes(searchTerm) || nik.includes(searchTerm);
+                    const matchesStatus = statusValue === "" || status === statusValue;
 
-        // Update info "Showing X to Y of Z entries"
-        const startEntry = totalEntries > 0 ? startIndex + 1 : 0;
-        const endEntry = Math.min(endIndex, totalEntries);
-        entriesInfo.textContent = `Showing ${startEntry} to ${endEntry} of ${totalEntries} entries`;
-
-        // Render ulang tombol paginasi
-        renderPaginationButtons(totalPages);
-    }
-
-    function renderPaginationButtons(totalPages) {
-        paginationButtons.innerHTML = ''; // Kosongkan tombol lama
-
-        // Tombol "Previous"
-        const prevButton = document.createElement('button');
-        prevButton.textContent = 'Previous';
-        prevButton.className = 'px-3 py-1 border border-gray-300 rounded';
-        if (currentPage === 1) {
-            prevButton.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
-            prevButton.disabled = true;
-        } else {
-             prevButton.classList.add('hover:bg-gray-100');
-             prevButton.addEventListener('click', () => {
-                currentPage--;
-                renderTable();
-            });
-        }
-        paginationButtons.appendChild(prevButton);
-
-        // Tombol Halaman (1, 2, 3, dst.)
-        for (let i = 1; i <= totalPages; i++) {
-            const pageButton = document.createElement('button');
-            pageButton.textContent = i;
-            pageButton.className = 'px-3 py-1 border border-gray-300 rounded';
-            if (i === currentPage) {
-                pageButton.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
-            } else {
-                 pageButton.classList.add('hover:bg-gray-100');
-                 pageButton.addEventListener('click', () => {
-                    currentPage = i;
-                    renderTable();
+                    return matchesSearch && matchesStatus;
                 });
-            }
-            paginationButtons.appendChild(pageButton);
-        }
 
-        // Tombol "Next"
-        const nextButton = document.createElement('button');
-        nextButton.textContent = 'Next';
-        nextButton.className = 'px-3 py-1 border border-gray-300 rounded';
-        if (currentPage === totalPages || totalPages === 0) {
-            nextButton.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
-            nextButton.disabled = true;
-        } else {
-            nextButton.classList.add('hover:bg-gray-100');
-            nextButton.addEventListener('click', () => {
-                currentPage++;
+
+                allRows.forEach(row => row.style.display = 'none');
+
+
+                const totalEntries = filteredRows.length;
+                const totalPages = Math.ceil(totalEntries / entriesPerPage);
+                currentPage = Math.min(currentPage, totalPages) || 1;
+
+                const startIndex = (currentPage - 1) * entriesPerPage;
+                const endIndex = startIndex + entriesPerPage;
+
+                const rowsToShow = filteredRows.slice(startIndex, endIndex);
+                rowsToShow.forEach(row => row.style.display = '');
+
+                const startEntry = totalEntries > 0 ? startIndex + 1 : 0;
+                const endEntry = Math.min(endIndex, totalEntries);
+                entriesInfo.textContent = `Showing ${startEntry} to ${endEntry} of ${totalEntries} entries`;
+
+                renderPaginationButtons(totalPages);
+            }
+
+            function renderPaginationButtons(totalPages) {
+                paginationButtons.innerHTML = '';
+                const prevButton = document.createElement('button');
+                prevButton.textContent = 'Previous';
+                prevButton.className = 'px-3 py-1 border border-gray-300 rounded';
+                if (currentPage === 1) {
+                    prevButton.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                    prevButton.disabled = true;
+                } else {
+                    prevButton.classList.add('hover:bg-gray-100');
+                    prevButton.addEventListener('click', () => {
+                        currentPage--;
+                        renderTable();
+                    });
+                }
+                paginationButtons.appendChild(prevButton);
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageButton = document.createElement('button');
+                    pageButton.textContent = i;
+                    pageButton.className = 'px-3 py-1 border border-gray-300 rounded';
+                    if (i === currentPage) {
+                        pageButton.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
+                    } else {
+                        pageButton.classList.add('hover:bg-gray-100');
+                        pageButton.addEventListener('click', () => {
+                            currentPage = i;
+                            renderTable();
+                        });
+                    }
+                    paginationButtons.appendChild(pageButton);
+                }
+
+                const nextButton = document.createElement('button');
+                nextButton.textContent = 'Next';
+                nextButton.className = 'px-3 py-1 border border-gray-300 rounded';
+                if (currentPage === totalPages || totalPages === 0) {
+                    nextButton.classList.add('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                    nextButton.disabled = true;
+                } else {
+                    nextButton.classList.add('hover:bg-gray-100');
+                    nextButton.addEventListener('click', () => {
+                        currentPage++;
+                        renderTable();
+                    });
+                }
+                paginationButtons.appendChild(nextButton);
+            }
+
+            entriesSelect.addEventListener('change', function() {
+                entriesPerPage = parseInt(this.value, 10);
+                currentPage = 1;
                 renderTable();
             });
-        }
-        paginationButtons.appendChild(nextButton);
-    }
-    
-    // Event Listeners untuk semua kontrol filter
-    entriesSelect.addEventListener('change', function () {
-        entriesPerPage = parseInt(this.value, 10);
-        currentPage = 1; // Selalu kembali ke halaman pertama saat filter diubah
-        renderTable();
-    });
 
-    searchInput.addEventListener('input', () => {
-        currentPage = 1;
-        renderTable();
-    });
-    
-    statusFilter.addEventListener('change', () => {
-        currentPage = 1;
-        renderTable();
-    });
+            searchInput.addEventListener('input', () => {
+                currentPage = 1;
+                renderTable();
+            });
 
-    // Render tabel untuk pertama kali saat halaman dimuat
-    renderTable();
-});
+            statusFilter.addEventListener('change', () => {
+                currentPage = 1;
+                renderTable();
+            });
+
+            renderTable();
+        });
     </script>
 
-<?php 
-} 
+<?php
+}
 ?>

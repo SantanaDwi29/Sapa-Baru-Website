@@ -66,11 +66,7 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end">
-                    <a href="#" class="text-lg text-indigo-600 hover:text-indigo-800 transition-colors duration-300">
-                        Lupa Password?
-                    </a>
-                </div>
+            
 
                 <button
                     type="submit"

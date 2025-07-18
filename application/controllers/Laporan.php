@@ -26,9 +26,6 @@ class Laporan extends CI_Controller
         $this->load->view('dashboard', $data);
     }
 
-    /**
-     * Laporan Data Pendatang Aktif
-     */
     public function pendatang($format)
     {
         $jenisAkun = $this->session->userdata('JenisAkun');
@@ -52,10 +49,7 @@ class Laporan extends CI_Controller
         }
     }
 
-    /**
-     * Laporan Data Penanggung Jawab
-     */
-    public function penanggung_jawab($format)
+     public function penanggung_jawab($format)
     {
         if ($this->session->userdata('JenisAkun') != 'Admin') {
             show_error('Hanya Admin yang dapat mengakses laporan ini.', 403, 'Akses Ditolak');
@@ -73,10 +67,7 @@ class Laporan extends CI_Controller
         }
     }
 
-    /**
-     * Laporan Arsip Data Pendatang
-     */
-    public function arsip($format)
+     public function arsip($format)
     {
         $jenisAkun = $this->session->userdata('JenisAkun');
         $idUser = $this->session->userdata('id_user');
@@ -99,10 +90,7 @@ class Laporan extends CI_Controller
         }
     }
 
-    /**
-     * Laporan Log Pengajuan Surat
-     */
-    public function view_log_surat()
+       public function view_log_surat()
     {
         $data = get_profile_data();
         $data['logs'] = $this->LogModel->get_riwayat_pengajuan();
@@ -129,9 +117,7 @@ class Laporan extends CI_Controller
         }
     }
 
-    /**
-     * Laporan Rekapitulasi per Lingkungan
-     */
+   
     public function rekap_lingkungan()
     {
         if ($this->session->userdata('JenisAkun') != 'Admin') {
@@ -163,7 +149,6 @@ class Laporan extends CI_Controller
         }
     }
 
-    // --- PRIVATE METHODS: FUNGSI-FUNGSI GENERATOR PDF & EXCEL ---
 
     private function _generate_pdf_pendatang($data)
     {
@@ -242,17 +227,14 @@ class Laporan extends CI_Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         
-        // --- STYLE DEFINITIONS ---
         $styleJudul = ['font' => ['bold' => true, 'size' => 14], 'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER]];
         $styleHeader = ['font' => ['bold' => true], 'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFD3D3D3']], 'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER], 'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]];
         $styleData = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]];
 
-        // --- MENAMBAHKAN JUDUL ---
         $sheet->mergeCells('A1:G1')->setCellValue('A1', strtoupper($data['judul']))->getStyle('A1')->applyFromArray($styleJudul);
         $sheet->getRowDimension('1')->setRowHeight(20);
         $sheet->mergeCells('A2:G2')->setCellValue('A2', 'Diekspor pada: ' . date('d F Y, H:i:s'))->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-        // --- MEMBUAT HEADER TABEL ---
         $headerRow = 4;
         $sheet->setCellValue('A'.$headerRow, 'No');
         $sheet->setCellValue('B'.$headerRow, 'Nama Lengkap');
@@ -263,7 +245,6 @@ class Laporan extends CI_Controller
         $sheet->setCellValue('G'.$headerRow, 'Kepala Lingkungan');
         $sheet->getStyle('A'.$headerRow.':G'.$headerRow)->applyFromArray($styleHeader);
 
-        // --- MENGISI DATA ---
         $row = $headerRow + 1;
         $no = 1;
         foreach ($data['pendatang'] as $p) {
@@ -277,7 +258,6 @@ class Laporan extends CI_Controller
             $row++;
         }
 
-        // --- FORMATTING AKHIR ---
         $lastRow = $row - 1;
         if ($lastRow >= ($headerRow + 1)) {
             $sheet->getStyle('A'.($headerRow + 1).':G'.$lastRow)->applyFromArray($styleData);
@@ -285,9 +265,7 @@ class Laporan extends CI_Controller
         foreach (range('A', 'G') as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
-        // $sheet->freezePane('A'.($headerRow + 1)); // Baris ini dinonaktifkan
-
-        // --- PROSES DOWNLOAD FILE ---
+       
         $writer = new Xlsx($spreadsheet);
         $filename = "laporan-pendatang-".date('Ymd').".xlsx";
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -302,17 +280,14 @@ class Laporan extends CI_Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         
-        // --- STYLE DEFINITIONS ---
         $styleJudul = ['font' => ['bold' => true, 'size' => 14], 'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER]];
         $styleHeader = ['font' => ['bold' => true], 'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFD3D3D3']], 'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER], 'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]];
         $styleData = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]];
 
-        // --- MENAMBAHKAN JUDUL ---
         $sheet->mergeCells('A1:E1')->setCellValue('A1', strtoupper($data['judul']))->getStyle('A1')->applyFromArray($styleJudul);
         $sheet->getRowDimension('1')->setRowHeight(20);
         $sheet->mergeCells('A2:E2')->setCellValue('A2', 'Diekspor pada: ' . date('d F Y, H:i:s'))->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         
-        // --- MEMBUAT HEADER TABEL ---
         $headerRow = 4;
         $sheet->setCellValue('A'.$headerRow, 'No');
         $sheet->setCellValue('B'.$headerRow, 'Nama Lengkap');
@@ -321,7 +296,6 @@ class Laporan extends CI_Controller
         $sheet->setCellValue('E'.$headerRow, 'Email');
         $sheet->getStyle('A'.$headerRow.':E'.$headerRow)->applyFromArray($styleHeader);
 
-        // --- MENGISI DATA ---
         $row = $headerRow + 1;
         $no = 1;
         foreach ($data['penanggung_jawab'] as $pj) {
@@ -333,7 +307,6 @@ class Laporan extends CI_Controller
             $row++;
         }
 
-        // --- FORMATTING AKHIR ---
         $lastRow = $row - 1;
         if ($lastRow >= ($headerRow + 1)) {
             $sheet->getStyle('A'.($headerRow + 1).':E'.$lastRow)->applyFromArray($styleData);
@@ -341,9 +314,7 @@ class Laporan extends CI_Controller
         foreach (range('A', 'E') as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
-        // $sheet->freezePane('A'.($headerRow + 1)); // Baris ini dinonaktifkan
-
-        // --- PROSES DOWNLOAD FILE ---
+        
         $writer = new Xlsx($spreadsheet);
         $filename = "laporan-penanggung-jawab-".date('Ymd').".xlsx";
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -357,7 +328,6 @@ class Laporan extends CI_Controller
     {
         $spreadsheet = new Spreadsheet();
         
-        // --- STYLE DEFINITIONS ---
         $styleJudul = ['font' => ['bold' => true, 'size' => 14], 'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER]];
         $styleHeader = ['font' => ['bold' => true], 'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFD3D3D3']], 'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER], 'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]];
         $styleData = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]];
@@ -365,7 +335,6 @@ class Laporan extends CI_Controller
         $styleDiverifikasi = ['fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFC6EFCE']], 'font' => ['color' => ['argb' => 'FF006100']], 'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]];
         $stylePending = ['fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFFFEB9C']], 'font' => ['color' => ['argb' => 'FF9C6500']], 'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]];
 
-        // --- MEMISAHKAN DATA BERDASARKAN STATUS ---
         $logsByStatus = ['diverifikasi' => [], 'ditolak' => [], 'pending' => []];
         foreach ($data['logs'] as $log) {
             $status = strtolower($log->StatusPengajuan);
@@ -378,7 +347,6 @@ class Laporan extends CI_Controller
             }
         }
 
-        // --- FUNGSI UNTUK MEMBUAT HEADER DAN JUDUL ---
         $createHeader = function(Worksheet $sheet, $title) use ($styleJudul, $styleHeader) {
             $sheet->mergeCells('A1:G1')->setCellValue('A1', strtoupper($title))->getStyle('A1')->applyFromArray($styleJudul);
             $sheet->getRowDimension('1')->setRowHeight(20);
@@ -396,7 +364,6 @@ class Laporan extends CI_Controller
             return $headerRow;
         };
 
-        // --- FUNGSI UNTUK MENGISI DATA ---
         $populateData = function(Worksheet $sheet, $logs, $startRow, $style) {
             $no = 1;
             $row = $startRow;
@@ -414,7 +381,6 @@ class Laporan extends CI_Controller
             return $row;
         };
 
-        // 1. MEMBUAT SHEET "SEMUA LOG"
         $sheetSemua = $spreadsheet->getActiveSheet();
         $sheetSemua->setTitle('Semua Log');
         $headerRow = $createHeader($sheetSemua, $data['judul']);
@@ -430,7 +396,7 @@ class Laporan extends CI_Controller
             $sheetSemua->setCellValue('G'.$currentRow, $log->NomorSurat);
             
             $status = strtolower($log->StatusPengajuan);
-            $styleToApply = $styleData; // Default style
+            $styleToApply = $styleData; 
             if ($status == 'ditolak') {
                 $styleToApply = $styleDitolak;
             } else if ($status == 'diverifikasi' || $status == 'terverifikasi' || $status == 'disetujui') {
@@ -471,17 +437,14 @@ class Laporan extends CI_Controller
         $headerRowDitolak = $createHeader($sheetDitolak, 'Laporan Log Ditolak');
         $populateData($sheetDitolak, $logsByStatus['ditolak'], $headerRowDitolak + 1, $styleDitolak);
 
-        // --- FORMATTING AKHIR UNTUK SEMUA SHEET ---
         foreach ($spreadsheet->getAllSheets() as $sheet) {
             foreach (range('A', 'G') as $columnID) {
                 $sheet->getColumnDimension($columnID)->setAutoSize(true);
             }
         }
         
-        // Mengatur sheet pertama yang aktif
         $spreadsheet->setActiveSheetIndex(0);
 
-        // --- PROSES DOWNLOAD FILE ---
         $writer = new Xlsx($spreadsheet);
         $filename = "laporan-log-surat-".date('Ymd').".xlsx";
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -496,17 +459,14 @@ class Laporan extends CI_Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         
-        // --- STYLE DEFINITIONS ---
         $styleJudul = ['font' => ['bold' => true, 'size' => 14], 'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER]];
         $styleHeader = ['font' => ['bold' => true], 'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFD3D3D3']], 'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER], 'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]];
         $styleData = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]];
 
-        // --- MENAMBAHKAN JUDUL ---
         $sheet->mergeCells('A1:D1')->setCellValue('A1', strtoupper($data['judul']))->getStyle('A1')->applyFromArray($styleJudul);
         $sheet->getRowDimension('1')->setRowHeight(20);
         $sheet->mergeCells('A2:D2')->setCellValue('A2', 'Diekspor pada: ' . date('d F Y, H:i:s'))->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-        // --- MEMBUAT HEADER TABEL ---
         $headerRow = 4;
         $sheet->setCellValue('A'.$headerRow, 'No');
         $sheet->setCellValue('B'.$headerRow, 'Nama Lingkungan');
@@ -514,7 +474,6 @@ class Laporan extends CI_Controller
         $sheet->setCellValue('D'.$headerRow, 'Jumlah Pendatang Aktif');
         $sheet->getStyle('A'.$headerRow.':D'.$headerRow)->applyFromArray($styleHeader);
 
-        // --- MENGISI DATA ---
         $row = $headerRow + 1;
         $no = 1;
         foreach ($data['rekap'] as $r) {
@@ -525,7 +484,6 @@ class Laporan extends CI_Controller
             $row++;
         }
 
-        // --- FORMATTING AKHIR ---
         $lastRow = $row - 1;
         if ($lastRow >= ($headerRow + 1)) {
             $sheet->getStyle('A'.($headerRow + 1).':D'.$lastRow)->applyFromArray($styleData);
@@ -533,9 +491,7 @@ class Laporan extends CI_Controller
         foreach (range('A', 'D') as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
-        // $sheet->freezePane('A'.($headerRow + 1)); // Baris ini dinonaktifkan
-
-        // --- PROSES DOWNLOAD FILE ---
+       
         $writer = new Xlsx($spreadsheet);
         $filename = "laporan-rekap-lingkungan-".date('Ymd').".xlsx";
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

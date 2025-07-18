@@ -1,10 +1,25 @@
 <?php
 $JenisAkun = $this->session->userdata('JenisAkun');
 ?>
-<!-- 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> -->
+<style>
+    .swal-custom-popup {
+        max-height: 90vh !important;
+        width: 550px !important;
+        max-width: 90%;
+    }
+
+    .swal-custom-html-container {
+        overflow-y: auto !important;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .swal-custom-html-container::-webkit-scrollbar {
+        display: none;
+    }
+</style>
 <div class="bg-white shadow-md rounded-lg">
+
     <div class="p-6 border-b flex justify-between items-center">
         <h1 class="text-3xl font-bold text-gray-800 flex items-center">
             <i class="fas fa-user text-indigo-950 mr-3"></i>
@@ -25,8 +40,8 @@ $JenisAkun = $this->session->userdata('JenisAkun');
             <div class="flex items-center gap-2">
                 <span class="text-lg text-gray-600">Show</span>
                 <select id="entries-select" class="border border-gray-300 rounded px-2 py-1 text-lg">
-                <option value="1">1</option>    
-                <option value="10" selected>10</option>
+                    <option value="1">1</option>
+                    <option value="10" selected>10</option>
                     <option value="25">25</option>
                     <option value="50">50</option>
                     <option value="100">100</option>
@@ -47,78 +62,109 @@ $JenisAkun = $this->session->userdata('JenisAkun');
 
         <div class="overflow-x-auto">
             <table class="w-full table-auto" id="pendatangTabel">
-            <thead class="bg-gray-100">
-    <tr class="text-gray-600 uppercase text-sm">
-        <th class="py-3 px-5 text-left font-semibold">No</th>
-        <th class="py-3 px-5 text-left font-semibold">Nama</th>
-        <th class="py-3 px-5 text-left font-semibold">NIK</th>
-        <th class="py-3 px-5 text-left font-semibold">Tanggal Masuk</th>
-        <th class="py-3 px-5 text-left font-semibold">Status Verifikasi</th>
-        <th class="py-3 px-5 text-left font-semibold">Alasan</th>
-        <th class="py-3 px-5 text-center font-semibold">Aksi</th>
-    </tr>
-</thead>
-<tbody class="text-gray-700 text-sm" id="table-body">
-    <?php foreach ($Pendatang as $index => $item): ?>
-        <tr class="border-b border-gray-200 hover:bg-gray-100">
-            <td class="py-3 px-5 text-left text-base"><?= $index + 1 ?></td>
-            <td class="py-3 px-5 text-left text-base"><?= htmlspecialchars($item->NamaLengkap) ?></td>
-            <td class="py-3 px-5 text-left text-base"><?= htmlspecialchars($item->NIK) ?></td>
-            <td class="py-3 px-5 text-left text-base"><?= htmlspecialchars($item->TanggalMasuk) ?></td>
-            <td class="py-3 px-5 text-left text-base">
-            <span class="px-3 py-1 text-base font-semibold rounded-full <?= $item->StatusTinggal == 'Aktif' ? 'bg-green-100 text-green-800' : ($item->StatusTinggal == 'Ditolak' || $item->StatusTinggal == 'Tolak' ? 'bg-red-100 text-red-800' : ($item->StatusTinggal == 'Tidak Aktif' ? 'bg-gray-100 text-gray-800' : 'bg-yellow-100 text-yellow-800')) ?>">
-    <?= htmlspecialchars($item->StatusTinggal) ?>
-</span>
-            </td>
-            <td class="py-3 px-5 text-left text-base">
-    <?php
-    // Cek jika status 'Tidak Aktif' dan AlasanKeluar tidak kosong
-    if ($item->StatusTinggal == 'Tidak Aktif' && !empty($item->AlasanKeluar)) {
-        // Jika ya, tampilkan alasan keluarnya dengan label "Keluar"
-        echo '<span class="font-semibold text-slate-500">Keluar:</span> ' . htmlspecialchars($item->AlasanKeluar);
-    } else {
-        // Jika statusnya lain (Pending, Aktif, Ditolak), tampilkan alasan biasa
-        echo htmlspecialchars($item->Alasan);
-    }
-    ?>
-</td>
-            <td class="py-3 px-5 text-center text-base">
-    <div class="flex justify-center items-center space-x-4 ">
-        <button onclick="window.location.href='<?= base_url('Pendatang/viewDetail/' . $item->idPendatang) ?>'" class="text-blue-600 hover:text-blue-800" title="Lihat Detail">
-            <i class="fas fa-eye text-2xl"></i>
-        </button>
+                <thead class="bg-gray-100">
+                    <tr class="text-gray-600 uppercase text-sm">
+                        <th class="py-3 px-5 text-left font-semibold">No</th>
+                        <th class="py-3 px-5 text-left font-semibold">Nama</th>
+                        <th class="py-3 px-5 text-left font-semibold">NIK</th>
+                        <th class="py-3 px-5 text-left font-semibold">Tanggal Masuk</th>
+                        <th class="py-3 px-5 text-left font-semibold">Status Verifikasi</th>
+                        <th class="py-3 px-5 text-left font-semibold">Alasan</th>
+                        <th class="py-3 px-5 text-center font-semibold">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700 text-sm" id="table-body">
+                    <?php foreach ($Pendatang as $index => $item): ?>
+                        <?php
+                        $row_class = 'border-b border-gray-200 hover:bg-gray-100 transition-colors duration-200';
+                        if ($item->StatusTinggal == 'Tidak Aktif') {
+                            $row_class .= ' bg-gray-50 opacity-60';
+                        }
+                        ?>
+                        <tr class="<?= $row_class ?>">
+                            <td class="py-3 px-5 text-left text-base"><?= $index + 1 ?></td>
+                            <td class="py-3 px-5 text-left text-base font-semibold text-gray-800"><?= htmlspecialchars($item->NamaLengkap) ?></td>
+                            <td class="py-3 px-5 text-left text-base"><?= htmlspecialchars($item->NIK) ?></td>
+                            <td class="py-3 px-5 text-left text-base"><?= htmlspecialchars(date('d M Y', strtotime($item->TanggalMasuk))) ?></td>
 
-        <?php if ($JenisAkun == "Admin" || $JenisAkun == "Penanggung Jawab") { ?>
-            <?php if ($item->StatusTinggal == 'Pending'): ?>
-                <button onclick="editUser('<?= $item->idPendatang ?>')" class="text-green-600 hover:text-green-800" title="Edit Data">
-                    <i class="fas fa-edit text-2xl"></i>
-                </button>
-            <?php endif; ?>
-            <?php if ($item->StatusTinggal != 'Aktif'): ?>
-                <button onclick="deleteUser('<?= $item->idPendatang ?>')" class="text-red-600 hover:text-red-800" title="Hapus Data">
-                    <i class="fas fa-trash text-2xl"></i>
-                </button>
-            <?php endif; ?>
-        <?php } ?>
+                            <td class="py-3 px-5 text-left text-base">
+                                <?php
+                                $status = $item->StatusTinggal;
+                                $badge_class = 'bg-yellow-100 text-yellow-800';
+                                $icon = 'fa-solid fa-clock';
+                                if ($status == 'Aktif') {
+                                    $badge_class = 'bg-green-100 text-green-800';
+                                    $icon = 'fa-solid fa-check-circle';
+                                } else if ($status == 'Ditolak' || $status == 'Tolak') {
+                                    $badge_class = 'bg-red-100 text-red-800';
+                                    $icon = 'fa-solid fa-times-circle';
+                                } else if ($status == 'Tidak Aktif') {
+                                    $badge_class = 'bg-slate-200 text-slate-600';
+                                    $icon = 'fa-solid fa-archive';
+                                }
+                                ?>
+                                <span class="px-3 py-1.5 text-sm font-semibold rounded-full inline-flex items-center gap-2 <?= $badge_class ?>">
+                                    <i class="<?= $icon ?>"></i>
+                                    <span><?= htmlspecialchars($status) ?></span>
+                                </span>
+                            </td>
 
-        <?php if ($JenisAkun == "Admin" || $JenisAkun == "Kepala Lingkungan") { ?>
-            <?php if ($item->StatusTinggal == 'Pending'): ?>
-                <button onclick="verifikasiUser(<?= $item->idPendatang ?>)" class="text-yellow-600 hover:text-orange-800" title="Verifikasi Pendatang">
-                    <i class="fa-regular fa-circle-check text-2xl"></i>
-                </button>
-            <?php endif; ?>
+                            <td class="py-3 px-5 text-left text-base">
+                                <?php
+                                if ($item->StatusTinggal == 'Tidak Aktif' && !empty($item->AlasanKeluar)) {
+                                    echo '<div class="text-sm text-slate-700">';
+                                    echo '<div class="font-bold text-slate-500">Telah Keluar / Diarsipkan</div>';
+                                    if (!empty($item->TanggalKeluar)) {
+                                        echo '<div><i class="fas fa-calendar-alt fa-fw mr-1 text-slate-400"></i> ' . htmlspecialchars(date('d M Y', strtotime($item->TanggalKeluar))) . '</div>';
+                                    }
+                                    echo '<div class="mt-1"><i class="fas fa-info-circle fa-fw mr-1 text-slate-400"></i> ' . htmlspecialchars($item->AlasanKeluar) . '</div>';
+                                    echo '</div>';
+                                } else if (($item->StatusTinggal == 'Ditolak' || $item->StatusTinggal == 'Tolak') && !empty($item->Alasan)) {
+                                    echo '<div class="text-sm text-red-700">';
+                                    echo '<div class="font-bold text-red-500">Ditolak</div>';
+                                    echo '<div class="mt-1"><i class="fas fa-info-circle fa-fw mr-1 text-red-400"></i> ' . htmlspecialchars($item->Alasan) . '</div>';
+                                    echo '</div>';
+                                } else {
+                                    echo '<span class="text-gray-400">-</span>';
+                                }
+                                ?>
+                            </td>
 
-            <?php if ($item->StatusTinggal == 'Aktif'): ?>
-                <button onclick="archiveUser(<?= $item->idPendatang ?>)" class="text-orange-500 hover:text-orange-700" title="Arsipkan / Set Tanggal Keluar">
-                    <i class="fas fa-calendar-times text-2xl"></i>
-                </button>
-            <?php endif; ?>
-            <?php } ?>
-    </div>
-</td>
-        </tr>
-    <?php endforeach; ?>
-</tbody>
+                            <td class="py-3 px-5 text-center text-base">
+                                <div class="flex justify-center items-center space-x-4">
+                                    <button onclick="window.location.href='<?= base_url('Pendatang/viewDetail/' . $item->idPendatang) ?>'" class="text-blue-600 hover:text-blue-800" title="Lihat Detail">
+                                        <i class="fas fa-eye text-2xl"></i>
+                                    </button>
+
+                                    <?php if ($JenisAkun == "Admin" || $JenisAkun == "Penanggung Jawab") { ?>
+                                        <?php if ($item->StatusTinggal == 'Pending'): ?>
+                                            <button onclick="editUser('<?= $item->idPendatang ?>')" class="text-green-600 hover:text-green-800" title="Edit Data"><i class="fas fa-edit text-2xl"></i></button>
+                                        <?php endif; ?>
+                                        <?php if ($item->StatusTinggal != 'Aktif'): ?>
+                                            <button onclick="deleteUser('<?= $item->idPendatang ?>')" class="text-red-600 hover:text-red-800" title="Hapus Data"><i class="fas fa-trash text-2xl"></i></button>
+                                        <?php endif; ?>
+                                    <?php } ?>
+
+                                    <?php if ($JenisAkun == "Admin" || $JenisAkun == "Kepala Lingkungan") { ?>
+                                        <?php if ($item->StatusTinggal == 'Pending'): ?>
+                                            <button onclick="verifikasiUser(<?= $item->idPendatang ?>)" class="text-yellow-600 hover:text-orange-800" title="Verifikasi Pendatang"><i class="fa-regular fa-circle-check text-2xl"></i></button>
+                                        <?php endif; ?>
+                                    <?php } ?>
+
+                                    <?php if ($item->StatusTinggal == 'Aktif'): ?>
+                                        <button onclick="archiveUser(<?= $item->idPendatang ?>)" class="text-orange-500 hover:text-orange-700" title="Arsipkan / Set Tanggal Keluar"><i class="fas fa-calendar-times text-2xl"></i></button>
+                                    <?php endif; ?>
+
+                                    <?php if ($item->StatusTinggal == 'Tidak Aktif'): ?>
+                                        <button onclick="reactivateUser(<?= $item->idPendatang ?>)" class="text-teal-500 hover:text-teal-700" title="Aktifkan Kembali">
+                                            <i class="fas fa-box-open text-2xl"></i>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
             </table>
         </div>
 
@@ -318,12 +364,22 @@ $JenisAkun = $this->session->userdata('JenisAkun');
                                 class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-lg transition-colors">
                                 Preview Foto
                             </button>
-                            <button type="button" onclick="scanKTP()"
-                                class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded text-lg transition-colors">
-                                Scan & Isi Otomatis
-                            </button>
+
                         </div>
                     </div>
+
+                    <?php if ($JenisAkun == "Admin"): ?>
+                        <div class="mb-4">
+                            <label class="block text-lg font-medium text-gray-700 mb-2">Pilih Penanggung Jawab (PJ)</label>
+                            <select id="pj_selector" name="id_pj" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">-- Pilih PJ untuk menentukan lokasi otomatis --</option>
+                                <?php foreach ($NamaPJ as $j): ?>
+                                    <option value="<?= $j->idPJ ?>"><?= htmlspecialchars($j->NamaPJ) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    <?php endif; ?>
+
 
                     <div>
                         <label class="block text-lg font-medium text-gray-700 mb-3">Lokasi Tinggal <span class="text-red-500">*</span> </label>
@@ -400,6 +456,7 @@ $JenisAkun = $this->session->userdata('JenisAkun');
                                 </select>
                             </div>
 
+
                             <input type="hidden" id="latitude_hidden" name="latitude_hidden">
                             <input type="hidden" id="longitude_hidden" name="longitude_hidden">
 
@@ -412,163 +469,230 @@ $JenisAkun = $this->session->userdata('JenisAkun');
     </div>
 </div>
 <!-- Filterasi -->
- <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('searchInput');
-    const entriesSelect = document.getElementById('entries-select');
-    const tableBody = document.getElementById('table-body');
-    const table = document.getElementById('pendatangTabel');
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
-    
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const entriesSelect = document.getElementById('entries-select');
+        const tableBody = document.getElementById('table-body');
+        const table = document.getElementById('pendatangTabel');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
 
-    let currentPage = 1;
-    let entriesPerPage = 10;
-    let filteredData = [];
-    let allData = [];
+        const pjSelector = document.getElementById('pj_selector');
 
-    function initializeData() {
-        const rows = tableBody.querySelectorAll('tr');
-        allData = Array.from(rows).map((row, index) => {
-            const cells = row.querySelectorAll('td');
-            return {
-                element: row.cloneNode(true),
-                originalIndex: index + 1,
-                nama: cells[1]?.textContent.trim().toLowerCase() || '',
-                nik: cells[2]?.textContent.trim().toLowerCase() || '',
-                tanggal: cells[3]?.textContent.trim() || '',
-                status: cells[4]?.textContent.trim().toLowerCase() || '',
-                alasan: cells[5]?.textContent.trim().toLowerCase() || ''
-            };
-        });
-        filteredData = [...allData];
-        updateTable();
-    }
+        if (pjSelector) {
+            pjSelector.addEventListener('change', function() {
+                const selectedPjId = this.value;
 
-    function filterData(searchTerm) {
-        const term = searchTerm.toLowerCase().trim();
+                if (!selectedPjId) {
+                    console.log('Tidak ada PJ yang dipilih.');
+                    return;
+                }
 
-        if (term === '') {
-            filteredData = [...allData];
-        } else {
-            filteredData = allData.filter(item =>
-                item.nama.includes(term) ||
-                item.nik.includes(term) ||
-                item.status.includes(term) ||
-                item.alasan.includes(term)
-            );
+                Swal.fire({
+                    title: 'Mencari Lokasi PJ...',
+                    icon: 'info',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                fetch(`<?= site_url('pendatang/get_pj_location/') ?>${selectedPjId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        Swal.close();
+                        if (data.status === 'success') {
+                            const lat = parseFloat(data.latitude);
+                            const lon = parseFloat(data.longitude);
+
+                            if (map) {
+                                map.setView([lat, lon], 17);
+                                if (marker) {
+                                    map.removeLayer(marker);
+                                }
+
+                                marker = L.marker([lat, lon]).addTo(map);
+
+                                updateCoordinates(lat, lon);
+                                reverseGeocode(lat, lon);
+                            } else {
+                                initializeMap();
+                                setTimeout(() => {
+                                    map.setView([lat, lon], 17);
+                                    if (marker) map.removeLayer(marker);
+                                    marker = L.marker([lat, lon]).addTo(map);
+                                    updateCoordinates(lat, lon);
+                                    reverseGeocode(lat, lon);
+                                }, 500);
+                            }
+
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal!',
+                                text: data.message,
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.close();
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Terjadi kesalahan saat mengambil data lokasi.',
+                        });
+                    });
+            });
         }
 
-        currentPage = 1;
-        updateTable();
-    }
 
-    function updateTable() {
-        const startIndex = (currentPage - 1) * entriesPerPage;
-        const endIndex = startIndex + entriesPerPage;
-        const pageData = filteredData.slice(startIndex, endIndex);
+        let currentPage = 1;
+        let entriesPerPage = 10;
+        let filteredData = [];
+        let allData = [];
 
-        tableBody.innerHTML = '';
+        function initializeData() {
+            const rows = tableBody.querySelectorAll('tr');
+            allData = Array.from(rows).map((row, index) => {
+                const cells = row.querySelectorAll('td');
+                return {
+                    element: row.cloneNode(true),
+                    originalIndex: index + 1,
+                    nama: cells[1]?.textContent.trim().toLowerCase() || '',
+                    nik: cells[2]?.textContent.trim().toLowerCase() || '',
+                    tanggal: cells[3]?.textContent.trim() || '',
+                    status: cells[4]?.textContent.trim().toLowerCase() || '',
+                    alasan: cells[5]?.textContent.trim().toLowerCase() || ''
+                };
+            });
+            filteredData = [...allData];
+            updateTable();
+        }
 
-        if (pageData.length === 0) {
-            const emptyRow = document.createElement('tr');
-            emptyRow.innerHTML = `
+        function filterData(searchTerm) {
+            const term = searchTerm.toLowerCase().trim();
+
+            if (term === '') {
+                filteredData = [...allData];
+            } else {
+                filteredData = allData.filter(item =>
+                    item.nama.includes(term) ||
+                    item.nik.includes(term) ||
+                    item.status.includes(term) ||
+                    item.alasan.includes(term)
+                );
+            }
+
+            currentPage = 1;
+            updateTable();
+        }
+
+        function updateTable() {
+            const startIndex = (currentPage - 1) * entriesPerPage;
+            const endIndex = startIndex + entriesPerPage;
+            const pageData = filteredData.slice(startIndex, endIndex);
+
+            tableBody.innerHTML = '';
+
+            if (pageData.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `
                 <td colspan="7" class="py-8 px-6 text-center text-gray-500 text-lg">
                     ${filteredData.length === 0 ? 'Tidak ada data yang ditemukan' : 'Tidak ada data di halaman ini'}
                 </td>
             `;
-            tableBody.appendChild(emptyRow);
-        } else {
-            pageData.forEach((item, index) => {
-                const row = item.element.cloneNode(true);
-                const firstCell = row.querySelector('td:first-child');
-                if (firstCell) {
-                    firstCell.textContent = startIndex + index + 1;
-                }
-                tableBody.appendChild(row);
-            });
-        }
-
-        updatePagination();
-        updateInfoText();
-    }
-
-    function updatePagination() {
-        const totalPages = Math.ceil(filteredData.length / entriesPerPage);
-
-        if (currentPage <= 1) {
-            prevBtn.disabled = true;
-            prevBtn.classList.add('cursor-not-allowed', 'bg-gray-100', 'text-gray-500');
-            prevBtn.classList.remove('hover:bg-gray-200', 'text-gray-700');
-        } else {
-            prevBtn.disabled = false;
-            prevBtn.classList.remove('cursor-not-allowed', 'bg-gray-100', 'text-gray-500');
-            prevBtn.classList.add('hover:bg-gray-200', 'text-gray-700');
-        }
-
-        if (currentPage >= totalPages || totalPages === 0) {
-            nextBtn.disabled = true;
-            nextBtn.classList.add('cursor-not-allowed', 'bg-gray-100', 'text-gray-500');
-            nextBtn.classList.remove('hover:bg-gray-200', 'text-gray-700');
-        } else {
-            nextBtn.disabled = false;
-            nextBtn.classList.remove('cursor-not-allowed', 'bg-gray-100', 'text-gray-500');
-            nextBtn.classList.add('hover:bg-gray-200', 'text-gray-700');
-        }
-
-        const currentPageBtn = document.querySelector('.bg-blue-500');
-        if (currentPageBtn) {
-            currentPageBtn.textContent = totalPages > 0 ? currentPage : 1;
-        }
-    }
-
-    function updateInfoText() {
-        const startIndex = (currentPage - 1) * entriesPerPage + 1;
-        const endIndex = Math.min(currentPage * entriesPerPage, filteredData.length);
-        const totalEntries = filteredData.length;
-
-        const infoText = document.querySelector('.text-lg.text-gray-700');
-        if (infoText) {
-            if (totalEntries === 0) {
-                infoText.textContent = 'Showing 0 to 0 of 0 entries';
+                tableBody.appendChild(emptyRow);
             } else {
-                infoText.textContent = `Showing ${startIndex} to ${endIndex} of ${totalEntries} entries`;
+                pageData.forEach((item, index) => {
+                    const row = item.element.cloneNode(true);
+                    const firstCell = row.querySelector('td:first-child');
+                    if (firstCell) {
+                        firstCell.textContent = startIndex + index + 1;
+                    }
+                    tableBody.appendChild(row);
+                });
+            }
+
+            updatePagination();
+            updateInfoText();
+        }
+
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredData.length / entriesPerPage);
+
+            if (currentPage <= 1) {
+                prevBtn.disabled = true;
+                prevBtn.classList.add('cursor-not-allowed', 'bg-gray-100', 'text-gray-500');
+                prevBtn.classList.remove('hover:bg-gray-200', 'text-gray-700');
+            } else {
+                prevBtn.disabled = false;
+                prevBtn.classList.remove('cursor-not-allowed', 'bg-gray-100', 'text-gray-500');
+                prevBtn.classList.add('hover:bg-gray-200', 'text-gray-700');
+            }
+
+            if (currentPage >= totalPages || totalPages === 0) {
+                nextBtn.disabled = true;
+                nextBtn.classList.add('cursor-not-allowed', 'bg-gray-100', 'text-gray-500');
+                nextBtn.classList.remove('hover:bg-gray-200', 'text-gray-700');
+            } else {
+                nextBtn.disabled = false;
+                nextBtn.classList.remove('cursor-not-allowed', 'bg-gray-100', 'text-gray-500');
+                nextBtn.classList.add('hover:bg-gray-200', 'text-gray-700');
+            }
+
+            const currentPageBtn = document.querySelector('.bg-blue-500');
+            if (currentPageBtn) {
+                currentPageBtn.textContent = totalPages > 0 ? currentPage : 1;
             }
         }
-    }
 
-    searchInput.addEventListener('input', function() {
-        filterData(this.value);
-    });
+        function updateInfoText() {
+            const startIndex = (currentPage - 1) * entriesPerPage + 1;
+            const endIndex = Math.min(currentPage * entriesPerPage, filteredData.length);
+            const totalEntries = filteredData.length;
 
-    entriesSelect.addEventListener('change', function() {
-        entriesPerPage = parseInt(this.value);
-        currentPage = 1;
-        updateTable();
-    });
-
-    prevBtn.addEventListener('click', function() {
-        if (currentPage > 1) {
-            currentPage--;
-            updateTable();
+            const infoText = document.querySelector('.text-lg.text-gray-700');
+            if (infoText) {
+                if (totalEntries === 0) {
+                    infoText.textContent = 'Showing 0 to 0 of 0 entries';
+                } else {
+                    infoText.textContent = `Showing ${startIndex} to ${endIndex} of ${totalEntries} entries`;
+                }
+            }
         }
-    });
 
-    nextBtn.addEventListener('click', function() {
-        const totalPages = Math.ceil(filteredData.length / entriesPerPage);
-        if (currentPage < totalPages) {
-            currentPage++;
+        searchInput.addEventListener('input', function() {
+            filterData(this.value);
+        });
+
+        entriesSelect.addEventListener('change', function() {
+            entriesPerPage = parseInt(this.value);
+            currentPage = 1;
             updateTable();
-        }
-    });
+        });
 
-    initializeData();
-});
+        prevBtn.addEventListener('click', function() {
+            if (currentPage > 1) {
+                currentPage--;
+                updateTable();
+            }
+        });
+
+        nextBtn.addEventListener('click', function() {
+            const totalPages = Math.ceil(filteredData.length / entriesPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateTable();
+            }
+        });
+
+        initializeData();
+    });
 </script>
 <script>
-     const imageModal = document.getElementById('imagePreviewModal');
-     const modalImage = document.getElementById('modalImage');
-     
+    const imageModal = document.getElementById('imagePreviewModal');
+    const modalImage = document.getElementById('modalImage');
+
     function openImageModal(imageSrc) {
         if (imageModal && modalImage) {
             modalImage.src = imageSrc;
@@ -576,6 +700,7 @@ document.addEventListener('DOMContentLoaded', function() {
             imageModal.classList.add('flex');
         }
     }
+
     function closeImageModal() {
         if (imageModal) {
             imageModal.classList.add('hidden');
@@ -588,6 +713,7 @@ document.addEventListener('DOMContentLoaded', function() {
             closeImageModal();
         }
     });
+
     function setThumbnail(jenis) {
         let fileInput, previewImg;
 
@@ -662,30 +788,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Show scanning progress
-        Swal.fire({
-            title: 'Memproses Foto KTP...',
-            text: 'Sedang melakukan scan otomatis',
-            icon: 'info',
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
 
-        // Simulate processing time
-        setTimeout(() => {
-            previewFoto('foto_ktp');
-
-            Swal.fire({
-                icon: 'info',
-                title: 'Fitur Dalam Pengembangan',
-                text: 'Fitur scan otomatis masih dalam pengembangan. Silakan isi data secara manual.',
-                confirmButtonText: 'Mengerti',
-                footer: '<small>Terima kasih atas pengertiannya</small>'
-            });
-        }, 2000);
     }
 
     function validateForm() {
@@ -695,7 +798,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'kecamatan', 'kelurahan', 'alamat', 'tanggal_masuk', 'tujuan', 'id_kaling'
         ];
 
-        // Validasi field wajib
+
         for (let field of requiredFields) {
             const element = document.getElementById(field);
             if (!element.value.trim()) {
@@ -715,7 +818,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         const rw = document.getElementById('rt').value;
-        // Validasi RT - PERBAIKAN UNTUK NILAI 0
         if (!rt || !rw || rt === '0' || rw === '0') {
             Swal.fire({
                 icon: 'warning',
@@ -729,7 +831,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             return false;
         }
-        // Validasi foto dan field lainnya...
         const fotoKTP = document.getElementById('fotoKTP');
         if (!fotoKTP.files || !fotoKTP.files[0]) {
             Swal.fire({
@@ -756,7 +857,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
 
-        // Validasi lainnya (NIK, telepon, dll.)
         const nik = document.getElementById('nik').value;
         if (nik.length !== 16 || !/^\d{16}$/.test(nik)) {
             Swal.fire({
@@ -809,7 +909,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const fotoKTP = document.getElementById('fotoKTP');
         const fotoDiri = document.getElementById('fotoDiri');
 
-        // Update status foto KTP
         const ktpStatus = document.getElementById('ktp-status');
         if (ktpStatus) {
             if (fotoKTP.files && fotoKTP.files[0]) {
@@ -819,7 +918,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Update status foto diri
         const diriStatus = document.getElementById('diri-status');
         if (diriStatus) {
             if (fotoDiri.files && fotoDiri.files[0]) {
@@ -830,7 +928,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Event listener untuk memperbarui status foto
     document.addEventListener('DOMContentLoaded', function() {
         const fotoKTP = document.getElementById('fotoKTP');
         const fotoDiri = document.getElementById('fotoDiri');
@@ -843,7 +940,6 @@ document.addEventListener('DOMContentLoaded', function() {
             fotoDiri.addEventListener('change', updatePhotoStatus);
         }
 
-        // Inisialisasi status awal
         updatePhotoStatus();
     });
 
@@ -851,9 +947,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('pendatang-form');
         if (form) {
             form.addEventListener('submit', function(e) {
-                e.preventDefault(); // Mencegah submit langsung
-
-                // Cek koneksi internet
+                e.preventDefault();
                 if (!navigator.onLine) {
                     Swal.fire({
                         icon: 'warning',
@@ -868,7 +962,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     return false;
                 }
 
-                // Show confirmation before submit
                 Swal.fire({
                     title: 'Konfirmasi Pengiriman',
                     text: 'Apakah Anda yakin data yang diisi sudah benar?',
@@ -892,7 +985,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         });
 
-                        // Submit form dengan error handling yang lebih baik
                         submitFormWithSuccess(this);
                     }
                 });
@@ -900,7 +992,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Enhanced wilayah loading with better error handling
     document.addEventListener("DOMContentLoaded", function() {
         const provinsiSelect = document.getElementById("provinsi");
         const kabupatenSelect = document.getElementById("kabupaten");
@@ -942,7 +1033,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const provinsiId = selectedOption.getAttribute('data-id');
             const provinsiName = selectedOption.value;
 
-            // Reset dropdown bawahnya
             kabupatenSelect.innerHTML = `<option value="">Pilih Kabupaten/Kota</option>`;
             kecamatanSelect.innerHTML = `<option value="">Pilih Kecamatan</option>`;
             kelurahanSelect.innerHTML = `<option value="">Pilih Kelurahan</option>`;
@@ -950,7 +1040,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (provinsiId && provinsiName && provinsiName !== "") {
                 console.log('Provinsi dipilih:', provinsiName, 'ID:', provinsiId);
 
-                // Show loading toast
                 const Toast = Swal.mixin({
                     toast: true,
                     position: 'top-end',
@@ -993,7 +1082,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const kabupatenId = selectedOption.getAttribute('data-id');
             const kabupatenName = selectedOption.value;
 
-            // Reset dropdown bawahnya
             kecamatanSelect.innerHTML = `<option value="">Pilih Kecamatan</option>`;
             kelurahanSelect.innerHTML = `<option value="">Pilih Kelurahan</option>`;
 
@@ -1042,7 +1130,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const kecamatanId = selectedOption.getAttribute('data-id');
             const kecamatanName = selectedOption.value;
 
-            // Reset dropdown kelurahan
             kelurahanSelect.innerHTML = `<option value="">Pilih Kelurahan</option>`;
 
             if (kecamatanId && kecamatanName && kecamatanName !== "") {
@@ -1096,7 +1183,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (kelurahanSelect) kelurahanSelect.innerHTML = `<option value="">Pilih Kelurahan</option>`;
     }
 
-    // Fungsi untuk validasi dropdown wilayah
     function validateWilayahSelection() {
         const provinsi = document.getElementById("provinsi")?.value;
         const kabupaten = document.getElementById("kabupaten")?.value;
@@ -1150,18 +1236,14 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const formData = new FormData(form);
 
-            // PERBAIKAN: Eksplisit set nilai RT dan RW
             const rtElement = document.getElementById('rt');
             const rwElement = document.getElementById('rw');
 
-            // Pastikan nilai 0 dikirim dengan benar
             if (rtElement) {
                 const rtValue = rtElement.value.trim();
                 if (rtValue === '' || rtValue === null || rtValue === undefined) {
-                    // Jika kosong, bisa set default atau biarkan kosong
-                    formData.set('rt', ''); // atau formData.delete('rt');
+                    formData.set('rt', '');
                 } else {
-                    // Pastikan nilai (termasuk 0) dikirim
                     formData.set('rt', rtValue);
                 }
             }
@@ -1169,19 +1251,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (rwElement) {
                 const rwValue = rwElement.value.trim();
                 if (rwValue === '' || rwValue === null || rwValue === undefined) {
-                    // Jika kosong, bisa set default atau biarkan kosong
-                    formData.set('rw', ''); // atau formData.delete('rw');
+                    formData.set('rw', '');
                 } else {
-                    // Pastikan nilai (termasuk 0) dikirim
                     formData.set('rw', rwValue);
                 }
             }
 
-            // Debug: Cek nilai yang dikirim
             console.log('RT Value being sent:', formData.get('rt'));
             console.log('RW Value being sent:', formData.get('rw'));
 
-            // Debug: Tampilkan semua data yang dikirim
             for (let [key, value] of formData.entries()) {
                 if (key === 'rt' || key === 'rw') {
                     console.log(`${key}:`, value, '(type:', typeof value, ')');
@@ -1233,7 +1311,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Fungsi tambahan untuk debugging
     function debugFormData() {
         const rtElement = document.getElementById('rt');
         const rwElement = document.getElementById('rw');
@@ -1253,7 +1330,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('======================');
     }
 
-    // Event listener untuk debugging (opsional)
     document.addEventListener('DOMContentLoaded', function() {
         const rtElement = document.getElementById('rt');
         const rwElement = document.getElementById('rw');
@@ -1377,7 +1453,6 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             map = L.map('map').setView([-8.40824, 115.18802], 13);
 
-            // Add tile layer
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
@@ -1392,7 +1467,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 reverseGeocode(e.latlng.lat, e.latlng.lng);
             });
 
-            // Map successfully initialized
             Swal.fire({
                 icon: 'success',
                 title: 'Peta Siap Digunakan',
@@ -1420,7 +1494,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Enhanced search functions (keeping existing implementations but with better notifications)
     function searchAddress() {
         const searchInput = document.getElementById('address-search');
         const searchResults = document.getElementById('search-results');
@@ -1437,11 +1510,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Show loading state
         searchResults.innerHTML = '<div class="p-3 text-center text-gray-500">Mencari alamat...</div>';
         searchResults.classList.remove('hidden');
 
-        // Search using Nominatim API
         const searchUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=id`;
 
         fetch(searchUrl)
@@ -1694,84 +1765,131 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
     function archiveUser(idPendatang) {
-    Swal.fire({
-        title: 'Arsipkan Pendatang',
-        html: `
-            <p class="mb-4">Silakan masukkan tanggal keluar dan alasan untuk mengarsipkan data pendatang ini.</p>
-            <div class="text-left">
-                <label for="swal-tanggal-keluar" class="block text-lg font-medium text-gray-700 mb-2">Tanggal Keluar <span class="text-red-500">*</span></label>
-                <input id="swal-tanggal-keluar" type="date" class="swal2-input w-full border border-gray-300 rounded-lg px-3 py-2 text-lg">
-            </div>
+        const mainModalContent = document.querySelector('#modal-overlay > div > div');
 
-            <div class="text-left mt-4">
-                <label for="swal-alasan-keluar" class="block text-lg font-medium text-gray-700 mb-2">Alasan Keluar <span class="text-red-500">*</span></label>
-                <textarea id="swal-alasan-keluar" class="swal2-textarea w-full border border-gray-300 rounded-lg px-3 py-2 text-lg" 
-                          placeholder="Contoh: Pindah ke luar kota karena pekerjaan." 
-                          style="min-height: 80px; resize: vertical;"></textarea>
+        Swal.fire({
+            heightAuto: false,
+            customClass: {
+                popup: 'swal-custom-popup',
+                htmlContainer: 'swal-custom-html-container',
+                title: 'text-2xl font-bold',
+            },
+
+            didOpen: () => {
+                document.body.style.overflow = 'hidden';
+                if (mainModalContent) mainModalContent.style.overflow = 'hidden';
+            },
+            didClose: () => {
+                document.body.style.overflow = 'auto';
+                if (mainModalContent) mainModalContent.style.overflow = 'auto';
+            },
+
+            title: '<i class="fas fa-archive text-orange-500"></i> Arsipkan Data Pendatang',
+            html: `
+            <p class="text-lg text-gray-600 mb-6">Anda akan menonaktifkan data ini. Silakan masukkan tanggal dan alasan keluar.</p>
+            <div class="text-left space-y-4 px-2">
+                <div>
+                    <label for="swal-tanggal-keluar" class="block text-lg font-medium text-gray-700 mb-2">Tanggal Keluar <span class="text-red-500">*</span></label>
+                    <input id="swal-tanggal-keluar" type="date" 
+                           class="w-full px-4 py-3 text-lg text-gray-700 border border-gray-300 rounded-lg transition duration-150 ease-in-out 
+                                  focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none">
+                </div>
+                <div>
+                    <label for="swal-alasan-keluar" class="block text-lg font-medium text-gray-700 mb-2">Alasan Keluar <span class="text-red-500">*</span></label>
+                    <textarea id="swal-alasan-keluar" 
+                              rows="4"
+                              class="w-full px-4 py-3 text-lg text-gray-700 border border-gray-300 rounded-lg transition duration-150 ease-in-out 
+                                     focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none" 
+                              placeholder="Contoh: Pindah ke luar kota karena pekerjaan." 
+                              style="resize: vertical;"></textarea>
+                </div>
             </div>
-            `,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Ya, Arsipkan!',
-        cancelButtonText: 'Batal',
-        preConfirm: () => {
-            const tanggalKeluar = document.getElementById('swal-tanggal-keluar').value;
-            const alasanKeluar = document.getElementById('swal-alasan-keluar').value;
-            if (!tanggalKeluar) {
-                Swal.showValidationMessage('Tanggal keluar wajib diisi!');
-                return false;
-            }
-            // --- PERUBAHAN PESAN VALIDASI ---
-            if (!alasanKeluar.trim()) {
-                Swal.showValidationMessage('Alasan keluar wajib diisi!');
-                return false;
-            }
-            return { tanggal: tanggalKeluar, alasan: alasanKeluar };
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Tampilkan loading
-            Swal.fire({
-                title: 'Memproses...',
-                text: 'Data sedang diarsipkan.',
-                icon: 'info',
-                allowOutsideClick: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
+        `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Arsipkan!',
+            cancelButtonText: 'Batal',
+            preConfirm: () => {
+                const tanggalKeluar = document.getElementById('swal-tanggal-keluar').value;
+                const alasanKeluar = document.getElementById('swal-alasan-keluar').value;
+                if (!tanggalKeluar) {
+                    Swal.showValidationMessage('Tanggal keluar wajib diisi!');
+                    return false;
                 }
-            });
+                if (!alasanKeluar.trim()) {
+                    Swal.showValidationMessage('Alasan keluar wajib diisi!');
+                    return false;
+                }
+                return {
+                    tanggal: tanggalKeluar,
+                    alasan: alasanKeluar
+                };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Memproses...',
+                    text: 'Data sedang diarsipkan.',
+                    icon: 'info',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => Swal.showLoading()
+                });
 
-            // Buat form untuk dikirim (logika ini tetap sama)
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `<?= site_url('pendatang/archive/') ?>${idPendatang}`;
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `<?= site_url('pendatang/archive/') ?>${idPendatang}`;
 
-            const inputTanggal = document.createElement('input');
-            inputTanggal.type = 'hidden';
-            inputTanggal.name = 'tanggal_keluar';
-            inputTanggal.value = result.value.tanggal;
-            form.appendChild(inputTanggal);
+                const inputTanggal = document.createElement('input');
+                inputTanggal.type = 'hidden';
+                inputTanggal.name = 'tanggal_keluar';
+                inputTanggal.value = result.value.tanggal;
+                form.appendChild(inputTanggal);
 
-            const inputAlasan = document.createElement('input');
-            inputAlasan.type = 'hidden';
-            inputAlasan.name = 'alasan_keluar'; // Menggunakan nama yang sudah kita sepakati
-            inputAlasan.value = result.value.alasan;
-            form.appendChild(inputAlasan);
+                const inputAlasan = document.createElement('input');
+                inputAlasan.type = 'hidden';
+                inputAlasan.name = 'alasan_keluar';
+                inputAlasan.value = result.value.alasan;
+                form.appendChild(inputAlasan);
 
-            document.body.appendChild(form);
-            form.submit();
-        }
-    });
-}
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    }
 
+    function reactivateUser(idPendatang) {
+        const mainModalContent = document.querySelector('#modal-overlay > div > div');
+
+        Swal.fire({
+            didOpen: () => {
+                if (mainModalContent) mainModalContent.style.overflow = 'hidden';
+            },
+            didClose: () => {
+                if (mainModalContent) mainModalContent.style.overflow = 'auto';
+            },
+
+            title: 'Aktifkan Kembali?',
+            text: "Anda yakin ingin mengaktifkan kembali data pendatang ini? Statusnya akan berubah menjadi 'Aktif'.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10B981',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Aktifkan!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '<?= site_url('Pendatang/reactivate/') ?>' + idPendatang;
+            }
+        });
+    }
     async function editUser(idPendatang) {
         console.log('Editing user with ID:', idPendatang);
 
-        // Show loading
         Swal.fire({
             title: 'Memuat data...',
             allowOutsideClick: false,
@@ -1861,15 +1979,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadWilayahForEdit(pendatangData) {
         const provinsiSelect = document.getElementById("provinsi");
 
-        // Set provinsi
         if (pendatangData.Provinsi) {
-            // Cari option provinsi yang sesuai
             for (let option of provinsiSelect.options) {
                 if (option.value === pendatangData.Provinsi) {
                     option.selected = true;
                     const provinsiId = option.getAttribute('data-id');
 
-                    // Load kabupaten setelah provinsi dipilih
                     if (provinsiId) {
                         loadKabupatenForEdit(provinsiId, pendatangData.Kabupaten, pendatangData);
                     }
@@ -1892,7 +2007,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     kabupatenSelect.innerHTML += `<option value="${kabupaten.name}" data-id="${kabupaten.id}" ${selected}>${kabupaten.name}</option>`;
                 });
 
-                // Load kecamatan jika kabupaten sudah terpilih
                 if (selectedKabupaten) {
                     const selectedOption = kabupatenSelect.querySelector(`option[value="${selectedKabupaten}"]`);
                     if (selectedOption) {
@@ -1906,7 +2020,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Fungsi untuk memuat kecamatan
     function loadKecamatanForEdit(kabupatenId, selectedKecamatan, pendatangData) {
         const kecamatanSelect = document.getElementById("kecamatan");
 
@@ -1920,7 +2033,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     kecamatanSelect.innerHTML += `<option value="${kecamatan.name}" data-id="${kecamatan.id}" ${selected}>${kecamatan.name}</option>`;
                 });
 
-                // Load kelurahan jika kecamatan sudah terpilih
                 if (selectedKecamatan) {
                     const selectedOption = kecamatanSelect.querySelector(`option[value="${selectedKecamatan}"]`);
                     if (selectedOption) {
@@ -1934,7 +2046,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Fungsi untuk memuat kelurahan
     function loadKelurahanForEdit(kecamatanId, selectedKelurahan) {
         const kelurahanSelect = document.getElementById("kelurahan");
 
@@ -1953,14 +2064,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Fungsi untuk inisialisasi map saat edit
     function initializeMapForEdit(latitude, longitude) {
         if (typeof L === 'undefined') {
             console.error('Leaflet library not loaded');
             return;
         }
 
-        // Remove existing map if any
         if (map) {
             map.remove();
             map = null;
@@ -1968,21 +2077,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            // Initialize map
             map = L.map('map').setView([latitude || -8.40824, longitude || 115.18802], 13);
 
-            // Add tile layer
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
 
-            // Add marker if coordinates exist
             if (latitude && longitude) {
                 marker = L.marker([parseFloat(latitude), parseFloat(longitude)]).addTo(map);
                 map.setView([parseFloat(latitude), parseFloat(longitude)], 15);
             }
 
-            // Add click event
             map.on('click', function(e) {
                 if (marker) {
                     map.removeLayer(marker);
@@ -2097,27 +2202,23 @@ document.addEventListener('DOMContentLoaded', function() {
                                 console.log('ID sebelum submit:', idPendatang);
                                 console.log('Alasan:', alasan);
 
-                                // Menggunakan form submit yang lebih reliable
                                 const form = document.createElement('form');
                                 form.method = 'POST';
                                 form.action = `<?= site_url('pendatang/tolak/') ?>${idPendatang}`;
                                 form.style.display = 'none';
 
-                                // Tambahkan input untuk ID (backup)
                                 const idInput = document.createElement('input');
                                 idInput.type = 'hidden';
                                 idInput.name = 'id';
-                                idInput.value = idPendatang; // PERBAIKAN: Gunakan idPendatang
+                                idInput.value = idPendatang;
                                 form.appendChild(idInput);
 
-                                // Tambahkan input untuk alasan
                                 const alasanInput = document.createElement('input');
                                 alasanInput.type = 'hidden';
                                 alasanInput.name = 'alasan';
                                 alasanInput.value = alasan;
                                 form.appendChild(alasanInput);
 
-                                // Tambahkan CSRF token jika ada
                                 const csrfMeta = document.querySelector('meta[name="csrf-token"]');
                                 if (csrfMeta) {
                                     const csrfInput = document.createElement('input');
@@ -2129,7 +2230,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
                                 document.body.appendChild(form);
 
-                                // Debug: Cek form sebelum submit
                                 console.log('Form action:', form.action);
                                 console.log('Form data:', new FormData(form));
 

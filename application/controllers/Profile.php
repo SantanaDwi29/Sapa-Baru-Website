@@ -14,15 +14,13 @@ class Profile extends CI_Controller
 
     public function index()
     {
-        $nik_user = $this->session->userdata('NIK');
-        if (!$nik_user) {
-            redirect('login');
-        }
+       $nik_user = $this->session->userdata('NIK');
+        if (!$nik_user) { redirect('login'); }
 
         $data['profile'] = $this->get_complete_profile($nik_user);
 
         if (!$data['profile']) {
-            $this->session->set_flashdata('error', 'Data profil tidak ditemukan');
+            $this->session->set_flashdata('error', 'Data profil tidak ditemukan.');
             redirect('dashboard');
         }
 
@@ -153,6 +151,7 @@ class Profile extends CI_Controller
             redirect('dashboard');
         }
 
+    
         $data = array_merge($data, get_profile_data());
         $data['success'] = $this->session->flashdata('success');
         $data['error'] = $this->session->flashdata('error');
@@ -167,6 +166,7 @@ class Profile extends CI_Controller
 
     public function save()
     {
+        
         $nik_user = $this->session->userdata('NIK');
         if (!$nik_user) {
             redirect('login');
@@ -184,10 +184,13 @@ class Profile extends CI_Controller
             'NamaLengkap' => trim($this->input->post('namaLengkap')),
             'Alamat'      => trim($this->input->post('alamat')),
             'Telp'        => trim($this->input->post('telp')),
-            'Email'       => trim($this->input->post('email'))
+            'Email'       => trim($this->input->post('email')),
+            'latitude_daftar'  => $this->input->post('latitude_daftar'),
+        'longitude_daftar' => $this->input->post('longitude_daftar'),
+
+
         ];
 
-        // Memanggil fungsi yang sudah diperbaiki
         if ($this->is_email_exists_in_master($data['Email'], $nik_user)) {
             $this->session->set_flashdata('error', 'Email sudah digunakan pengguna lain');
             redirect('profile/editProfile');
@@ -197,11 +200,8 @@ class Profile extends CI_Controller
         $this->db->trans_start();
         $this->DaftarModel->update_by_nik($nik_user, $data);
         if ($this->LoginModel->get_by_nik($nik_user)) {
-            // Hanya update kolom yang relevan di tb_login
             $login_update_data = ['NamaLengkap' => $data['NamaLengkap']];
-            // Jika tb_login punya kolom email, tambahkan di sini. Jika tidak, hapus baris di bawah.
-            // $login_update_data['Email'] = $data['Email']; 
-            $this->LoginModel->updateLogin($nik_user, $login_update_data);
+                        $this->LoginModel->update($nik_user, $login_update_data);
         }
         $this->db->trans_complete();
 
@@ -218,38 +218,28 @@ class Profile extends CI_Controller
     private function validateProfileData()
     {
         $errors = [];
-        // Logika validasi Anda di sini...
         return $errors;
     }
 
-    private function get_complete_profile($nik)
-    {
-        $profile_daftar = $this->DaftarModel->get_by_nik($nik);
-        if (!$profile_daftar) {
-            $profile_login = $this->LoginModel->get_by_nik($nik);
-            if ($profile_login) {
-                $profile_login->StatusAktivasi = 'Aktif';
-                $profile_login->FotoProfil = null;
-                return $profile_login;
-            }
-            return null;
-        }
+  private function get_complete_profile($nik)
+{
+    $profile = $this->DaftarModel->get_by_nik($nik);
 
-        $complete_profile = $profile_daftar;
-        $profile_login = $this->LoginModel->get_by_nik($nik);
-        if ($profile_login) {
-            $complete_profile->JenisAkun = $profile_login->JenisAkun ?? $complete_profile->JenisAkun;
-            if ($complete_profile->JenisAkun === 'Admin') {
-                $complete_profile->StatusAktivasi = 'Aktif';
-            }
+    if ($profile) {
+        $profile_login = $this->LoginModel->cekLoginNIK($nik);
+        if ($profile_login && isset($profile_login->JenisAkun)) {
+            $profile->JenisAkun = $profile_login->JenisAkun; 
         }
-
-        if (!isset($complete_profile->FotoProfil)) {
-            $complete_profile->FotoProfil = null;
-        }
-
-        return $complete_profile;
+        return $profile; 
     }
+
+    $profile_login = $this->LoginModel->cekLoginNIK($nik);
+    if ($profile_login) {
+        $profile_login->latitude_daftar = null;
+        $profile_login->longitude_daftar = null;
+    }
+    return $profile_login;
+}
     private function is_email_exists_in_master($email, $current_nik)
     {
         return $this->DaftarModel->is_email_exists($email, $current_nik);
@@ -273,55 +263,52 @@ class Profile extends CI_Controller
     }
 
 
-    public function proses_ganti_password()
-    {
-        $this->validasi->validasiakun();
-        $this->load->library('form_validation');
+public function proses_ganti_password()
+{
+    $this->validasi->validasiakun();
+    $this->load->library('form_validation');
 
+    $this->form_validation->set_rules('password_lama', 'Password Lama', 'required|trim');
+    $this->form_validation->set_rules('password_baru', 'Password Baru', 'required|trim|min_length[6]|matches[konfirmasi_password]');
+    $this->form_validation->set_rules('konfirmasi_password', 'Konfirmasi Password', 'required|trim');
 
-        $this->form_validation->set_rules('password_lama', 'Password Lama', 'required|trim');
-        $this->form_validation->set_rules('password_baru', 'Password Baru', 'required|trim|min_length[8]|matches[konfirmasi_password]');
-        $this->form_validation->set_rules('konfirmasi_password', 'Konfirmasi Password', 'required|trim');
+    if ($this->form_validation->run() == FALSE) {
+        $this->session->set_flashdata('error', validation_errors());
+        redirect('profile/gantiPassword');
+    } else {
+        $nik_user = $this->session->userdata('NIK');
+        $password_lama = $this->input->post('password_lama');
+        $password_baru = $this->input->post('password_baru');
 
-        if ($this->form_validation->run() == FALSE) {
-            $this->session->set_flashdata('error', validation_errors());
-            redirect('profile/gantiPassword');
-        } else {
-            $nik_user = $this->session->userdata('NIK');
-            $password_lama = $this->input->post('password_lama');
-            $password_baru = $this->input->post('password_baru');
+        $user = $this->DaftarModel->get_by_nik($nik_user) ?? $this->LoginModel->get_by_nik($nik_user);
 
-            $user = $this->DaftarModel->get_by_nik($nik_user);
+        if ($user && password_verify($password_lama, $user->Password)) {
 
-            if (!$user) {
-                $user = $this->LoginModel->get_by_nik($nik_user);
+            $hashed_password_baru = password_hash($password_baru, PASSWORD_DEFAULT);
+
+            $this->db->trans_start();
+
+            if ($this->DaftarModel->get_by_nik($nik_user)) {
+                $this->db->where('NIK', $nik_user)->update('tb_daftar', ['Password' => $hashed_password_baru]);
             }
 
-            if ($user && $user->Password == $password_lama) {
+            if ($this->LoginModel->get_by_nik($nik_user)) {
+                $this->db->where('NIK', $nik_user)->update('tb_login', ['Password' => $hashed_password_baru]);
+            }
 
-                $this->db->trans_start();
+            $this->db->trans_complete();
 
-                if ($this->DaftarModel->get_by_nik($nik_user)) {
-                    $this->db->where('NIK', $nik_user)->update('tb_daftar', ['Password' => $password_baru]);
-                }
-
-                if ($this->LoginModel->get_by_nik($nik_user)) {
-                    $this->db->where('NIK', $nik_user)->update('tb_login', ['Password' => $password_baru]);
-                }
-
-                $this->db->trans_complete();
-
-                if ($this->db->trans_status() === FALSE) {
-                    $this->session->set_flashdata('error', 'Terjadi kesalahan database. Gagal mengubah password.');
-                    redirect('profile/gantiPassword');
-                } else {
-                    $this->session->set_flashdata('success', 'Password Anda berhasil diubah.');
-                    redirect('profile');
-                }
-            } else {
-                $this->session->set_flashdata('error', 'Password Lama yang Anda masukkan salah.');
+            if ($this->db->trans_status() === FALSE) {
+                $this->session->set_flashdata('error', 'Terjadi kesalahan database. Gagal mengubah password.');
                 redirect('profile/gantiPassword');
+            } else {
+                $this->session->set_flashdata('success', 'Password Anda berhasil diubah.');
+                redirect('profile');
             }
+        } else {
+            $this->session->set_flashdata('error', 'Password Lama yang Anda masukkan salah.');
+            redirect('profile/gantiPassword');
         }
     }
+}
 }

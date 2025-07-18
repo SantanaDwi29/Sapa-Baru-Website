@@ -7,15 +7,30 @@ class Pendatang extends CI_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model(['PendatangModel', 'validasi','DaftarModel']);
-        $this->load->helper(['url', 'form','profile']);
+        $this->load->model(['PendatangModel', 'validasi', 'DaftarModel']);
+        $this->load->helper(['url', 'form', 'profile']);
         $this->validasi->validasiakun();
     }
 
     public function index()
     {
-        $data['Pendatang'] = $this->PendatangModel->get_all_pendatang();
+        $jenisAkun = $this->session->userdata('JenisAkun');
+        $id_user = $this->session->userdata('id_user');
+        switch ($jenisAkun) {
+            case 'Penanggung Jawab':
+                $data['Pendatang'] = $this->PendatangModel->get_pendatang_by_pj($id_user);
+                break;
+
+            case 'Admin':
+            case 'Kepala Lingkungan':
+            default:
+                $data['Pendatang'] = $this->PendatangModel->get_all_pendatang_with_details();
+                break;
+        }
+
         $data['NamaKaling'] = $this->DaftarModel->get_all_kaling();
+        $data['NamaPJ'] = $this->DaftarModel->get_all_pj();
+
         $data = array_merge($data, get_profile_data());
         $data['success'] = $this->session->flashdata('success');
         $data['error'] = $this->session->flashdata('error');
@@ -23,10 +38,9 @@ class Pendatang extends CI_Controller
         $this->load->view('dashboard', $data);
     }
 
-    // Method baru untuk mendapatkan detail pendatang (untuk modal view)
+
     public function detail($id = null)
     {
-        // Validasi ID
         if (empty($id) || !is_numeric($id)) {
             if ($this->input->is_ajax_request()) {
                 header('Content-Type: application/json');
@@ -41,9 +55,8 @@ class Pendatang extends CI_Controller
             return;
         }
 
-        // Ambil data detail pendatang
         $pendatang = $this->PendatangModel->get_detail_by_id($id);
-        
+
         if (!$pendatang) {
             if ($this->input->is_ajax_request()) {
                 header('Content-Type: application/json');
@@ -58,7 +71,6 @@ class Pendatang extends CI_Controller
             return;
         }
 
-        // Siapkan data untuk response
         $response_data = [
             'status' => 'success',
             'data' => [
@@ -85,30 +97,26 @@ class Pendatang extends CI_Controller
                 'TanggalKeluar' => $pendatang->TanggalKeluar,
                 'StatusTinggal' => $pendatang->StatusTinggal,
                 'NamaKaling' => isset($pendatang->NamaKaling) ? $pendatang->NamaKaling : '-',
+                'NamaPJ' => isset($pendatang->NamaPJ) ? $pendatang->NamaPJ : '-',
                 'Tujuan' => $pendatang->Tujuan,
                 'FotoDiri' => $pendatang->FotoDiri ? base_url('uploads/fotodiri/' . $pendatang->FotoDiri) : '',
                 'FotoKTP' => $pendatang->FotoKTP ? base_url('uploads/fotoktp/' . $pendatang->FotoKTP) : ''
             ]
         ];
 
-        // Return JSON response untuk AJAX request
         if ($this->input->is_ajax_request()) {
             header('Content-Type: application/json');
             echo json_encode($response_data);
             return;
         }
 
-        // Jika bukan AJAX, redirect ke halaman utama
         redirect('pendatang');
     }
 
-    // Method untuk verifikasi pendatang
     public function verifikasi($id = null)
     {
-        // Debug log
         log_message('debug', 'Verifikasi called with ID: ' . $id);
-        
-        // Validasi ID
+
         if (empty($id) || !is_numeric($id)) {
             log_message('error', 'Invalid ID in verifikasi: ' . $id);
             if ($this->input->is_ajax_request()) {
@@ -124,7 +132,6 @@ class Pendatang extends CI_Controller
             return;
         }
 
-        // Cek apakah data pendatang ada
         $pendatang = $this->PendatangModel->get_by_id($id);
         if (!$pendatang) {
             log_message('error', 'Pendatang not found with ID: ' . $id);
@@ -142,15 +149,14 @@ class Pendatang extends CI_Controller
         }
 
         try {
-            // Update status menjadi Aktif
             $data = [
                 'StatusTinggal' => 'Aktif',
-                'Alasan' => 'Diverifikasi  pada ' . date('Y-m-d H:i:s')
+                'Alasan' => 'Diverifikasi pada ' . date('Y-m-d H:i:s')
             ];
 
             log_message('debug', 'Updating pendatang with data: ' . json_encode($data));
             $result = $this->PendatangModel->update($id, $data);
-            
+
             if ($result) {
                 log_message('info', 'Pendatang verified successfully: ' . $id);
                 $this->session->set_flashdata('success', 'Pendatang berhasil diverifikasi!');
@@ -158,7 +164,6 @@ class Pendatang extends CI_Controller
                 log_message('error', 'Failed to verify pendatang: ' . $id);
                 $this->session->set_flashdata('error', 'Gagal memverifikasi pendatang!');
             }
-
         } catch (Exception $e) {
             log_message('error', 'Exception in verifikasi: ' . $e->getMessage());
             $this->session->set_flashdata('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -167,20 +172,16 @@ class Pendatang extends CI_Controller
         redirect('pendatang');
     }
 
-    // Method untuk menolak verifikasi pendatang
     public function tolak($id = null)
     {
-        // Debug log
         log_message('debug', 'Tolak called with ID from URL: ' . $id);
         log_message('debug', 'POST data: ' . json_encode($this->input->post()));
-        
-        // Ambil ID dari parameter URL atau POST
+
         if (empty($id)) {
             $id = $this->input->post('id');
             log_message('debug', 'ID from POST: ' . $id);
         }
 
-        // Validasi ID
         if (empty($id) || !is_numeric($id)) {
             log_message('error', 'Invalid ID in tolak: ' . $id);
             if ($this->input->is_ajax_request()) {
@@ -196,7 +197,6 @@ class Pendatang extends CI_Controller
             return;
         }
 
-        // Cek apakah data pendatang ada
         $pendatang = $this->PendatangModel->get_by_id($id);
         if (!$pendatang) {
             log_message('error', 'Pendatang not found with ID: ' . $id);
@@ -213,10 +213,9 @@ class Pendatang extends CI_Controller
             return;
         }
 
-        // Ambil alasan penolakan
         $alasan = $this->input->post('alasan');
         log_message('debug', 'Alasan from POST: ' . $alasan);
-        
+
         if (empty($alasan)) {
             log_message('error', 'Empty alasan in tolak');
             if ($this->input->is_ajax_request()) {
@@ -233,15 +232,14 @@ class Pendatang extends CI_Controller
         }
 
         try {
-            // Update status menjadi Ditolak
             $data = [
                 'StatusTinggal' => 'Ditolak',
-                'Alasan' => $alasan . ' (Ditolak pada ' . date('Y-m-d H:i:s'). ')'
+                'Alasan' => $alasan . ' (Ditolak pada ' . date('Y-m-d H:i:s') . ')'
             ];
 
             log_message('debug', 'Updating pendatang with data: ' . json_encode($data));
             $result = $this->PendatangModel->update($id, $data);
-            
+
             if ($result) {
                 log_message('info', 'Pendatang rejected successfully: ' . $id);
                 $this->session->set_flashdata('success', 'Pendatang berhasil ditolak!');
@@ -249,7 +247,6 @@ class Pendatang extends CI_Controller
                 log_message('error', 'Failed to reject pendatang: ' . $id);
                 $this->session->set_flashdata('error', 'Gagal menolak pendatang!');
             }
-
         } catch (Exception $e) {
             log_message('error', 'Exception in tolak: ' . $e->getMessage());
             $this->session->set_flashdata('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -261,25 +258,25 @@ class Pendatang extends CI_Controller
     private function buatNamaFile()
     {
         $kata = "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789";
-        $namafile = substr(str_shuffle($kata), 0, 6); 
-        return $namafile . '_' . time(); 
+        $namafile = substr(str_shuffle($kata), 0, 6);
+        return $namafile . '_' . time();
     }
 
-    private function upload_file($uploadFile, $field, $namaFileAcak) 
+    private function upload_file($uploadFile, $field, $namaFileAcak)
     {
         if (empty($uploadFile['name'])) {
             return "";
         }
 
         $extractFile = pathinfo($uploadFile['name']);
-        $ekst = strtolower($extractFile['extension']); 
-        $newName = $namaFileAcak . "." . $ekst; 
+        $ekst = strtolower($extractFile['extension']);
+        $newName = $namaFileAcak . "." . $ekst;
 
         $uploadPath = '';
         if ($field === 'fotoDiri') {
             $uploadPath = FCPATH . 'uploads/fotodiri';
         } elseif ($field === 'fotoKTP') {
-            $uploadPath = FCPATH . 'uploads/fotoktp'; 
+            $uploadPath = FCPATH . 'uploads/fotoktp';
         }
 
         $config['upload_path'] = $uploadPath;
@@ -308,7 +305,7 @@ class Pendatang extends CI_Controller
     {
         $namaFileAcakDiri = $this->buatNamaFile();
         $namaFileAcakKTP = $this->buatNamaFile();
-        
+
         $idPendatang = $this->input->post('id_pendatang');
         $latitude = $this->input->post('latitude');
         $longitude = $this->input->post('longitude');
@@ -318,14 +315,12 @@ class Pendatang extends CI_Controller
             $rw = '0';
             log_message('debug', 'RW was empty, set to: ' . $rw);
         }
-        
-        // Validasi RT harus numerik
+
         if (!is_numeric($rt)) {
             log_message('error', 'RT is not numeric: ' . $rt);
             $rt = '0';
         }
-        
-        // Validasi RW harus numerik
+
         if (!is_numeric($rw)) {
             log_message('error', 'RW is not numeric: ' . $rw);
             $rw = '0';
@@ -337,9 +332,34 @@ class Pendatang extends CI_Controller
             $longitude = '0';
         }
 
+        $jenisAkun = $this->session->userdata('JenisAkun');
+        $id_pj_from_post = $this->input->post('id_pj');
+        $id_user = $this->session->userdata('id_user');
+
+        $idPenanggungJawab = null;
+        if ($jenisAkun == 'Admin') {
+            $idPenanggungJawab = $id_pj_from_post;
+        } elseif ($jenisAkun == 'Penanggung Jawab') {
+            $idPenanggungJawab = $id_user;
+        }
+
+        if (empty($idPenanggungJawab)) {
+            $error_message = 'ID Penanggung Jawab tidak valid. Silakan login ulang.';
+            if ($this->input->is_ajax_request()) {
+                header('Content-Type: application/json');
+                echo json_encode(['status' => 'error', 'message' => $error_message]);
+                return;
+            } else {
+                $this->session->set_flashdata('error', $error_message);
+                redirect('pendatang');
+                return;
+            }
+        }
+
         $data = [
             'idPendatang' => $idPendatang,
             'idKaling' => $this->input->post('id_kaling'),
+            'idPenanggungJawab' => $idPenanggungJawab, // Kolom yang benar dan satu-satunya
             'NIK' => $this->input->post('nik'),
             'NamaLengkap' => $this->input->post('nama_lengkap'),
             'Alamat' => $this->input->post('alamat'),
@@ -360,13 +380,13 @@ class Pendatang extends CI_Controller
             'Kelurahan' => $this->input->post('kelurahan'),
             'RT' => $rt,
             'RW' => $rw,
-            'Latitude' => $latitude,  
+            'Latitude' => $latitude,
             'Longitude' => $longitude,
             'Alasan' => '-'
         ];
-        log_message('debug', 'Data to be saved - RT: "' . $data['RT'] . '", RW: "' . $data['RW'] . '"');
-        log_message('debug', 'Complete data array: ' . print_r($data, true));
+
         try {
+            $success_message = '';
             if (empty($idPendatang)) {
                 if (!empty($_FILES['fotoDiri']['name'])) {
                     $FotoDiri = $this->upload_file($_FILES['fotoDiri'], 'fotoDiri', $namaFileAcakDiri);
@@ -374,16 +394,16 @@ class Pendatang extends CI_Controller
                         $data['FotoDiri'] = $FotoDiri;
                     }
                 }
-                
+
                 if (!empty($_FILES['fotoKTP']['name'])) {
                     $FotoKTP = $this->upload_file($_FILES['fotoKTP'], 'fotoKTP', $namaFileAcakKTP);
                     if (!empty($FotoKTP)) {
                         $data['FotoKTP'] = $FotoKTP;
                     }
                 }
-                
-                $result = $this->PendatangModel->insert($data);
-                $this->session->set_flashdata('success', 'Data pendatang berhasil ditambahkan');
+
+                $this->PendatangModel->insert($data);
+                $success_message = 'Data pendatang berhasil ditambahkan';
             } else {
                 if (!empty($_FILES['fotoDiri']['name'])) {
                     $old_data = $this->PendatangModel->get_by_id($idPendatang);
@@ -393,13 +413,13 @@ class Pendatang extends CI_Controller
                             unlink($old_file);
                         }
                     }
-                    
+
                     $FotoDiri = $this->upload_file($_FILES['fotoDiri'], 'fotoDiri', $namaFileAcakDiri);
                     if (!empty($FotoDiri)) {
                         $data['FotoDiri'] = $FotoDiri;
                     }
                 }
-                
+
                 if (!empty($_FILES['fotoKTP']['name'])) {
                     $old_data = $this->PendatangModel->get_by_id($idPendatang);
                     if ($old_data && $old_data->FotoKTP) {
@@ -408,47 +428,60 @@ class Pendatang extends CI_Controller
                             unlink($old_file);
                         }
                     }
-                    
+
                     $FotoKTP = $this->upload_file($_FILES['fotoKTP'], 'fotoKTP', $namaFileAcakKTP);
                     if (!empty($FotoKTP)) {
                         $data['FotoKTP'] = $FotoKTP;
                     }
                 }
-                
-                $result = $this->PendatangModel->update($idPendatang, $data);
-                $this->session->set_flashdata('success', 'Data pendatang berhasil diperbarui');
+
+                $this->PendatangModel->update($idPendatang, $data);
+                $success_message = 'Data pendatang berhasil diperbarui';
             }
-            redirect('pendatang');
+
+            if ($this->input->is_ajax_request()) {
+                header('Content-Type: application/json');
+                echo json_encode(['status' => 'success', 'message' => $success_message]);
+            } else {
+                $this->session->set_flashdata('success', $success_message);
+                redirect('pendatang');
+            }
         } catch (Exception $e) {
-            $this->session->set_flashdata('error', 'Terjadi kesalahan: ' . $e->getMessage());
-            redirect('pendatang');
+            $error_message = 'Terjadi kesalahan: ' . $e->getMessage();
+            if ($this->input->is_ajax_request()) {
+                header('Content-Type: application/json');
+                http_response_code(500);
+                echo json_encode(['status' => 'error', 'message' => $error_message]);
+            } else {
+                $this->session->set_flashdata('error', $error_message);
+                redirect('pendatang');
+            }
         }
     }
     public function get($id)
-{
-    // Validasi ID
-    if (!$id || !is_numeric($id)) {
-        header('Content-Type: application/json');
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'ID tidak valid'
-        ]);
-        return;
-    }
+    {
+        if (!$id || !is_numeric($id)) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'ID tidak valid'
+            ]);
+            return;
+        }
 
-    $Pendatang = $this->PendatangModel->get_by_id($id);
-    
-    if ($Pendatang) {
-        header('Content-Type: application/json');
-        echo json_encode($Pendatang);
-    } else {
-        header('Content-Type: application/json');
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'Data tidak ditemukan'
-        ]);
+        $Pendatang = $this->PendatangModel->get_by_id($id);
+
+        if ($Pendatang) {
+            header('Content-Type: application/json');
+            echo json_encode($Pendatang);
+        } else {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Data tidak ditemukan'
+            ]);
+        }
     }
-}
     public function delete($id = null)
     {
         if (!$id) {
@@ -457,7 +490,7 @@ class Pendatang extends CI_Controller
         }
 
         $pendatang = $this->PendatangModel->get_foto_by_id($id);
-        
+
         if (!$pendatang) {
             $this->session->set_flashdata('error', 'Data pendatang tidak ditemukan');
             redirect('pendatang');
@@ -479,13 +512,12 @@ class Pendatang extends CI_Controller
             }
 
             $result = $this->PendatangModel->delete($id);
-            
+
             if ($result) {
                 $this->session->set_flashdata('success', 'Data pendatang berhasil dihapus');
             } else {
                 $this->session->set_flashdata('error', 'Gagal menghapus data pendatang');
             }
-
         } catch (Exception $e) {
             $this->session->set_flashdata('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
@@ -501,16 +533,17 @@ class Pendatang extends CI_Controller
 
         redirect('pendatang');
     }
-    public function viewDetail($id = null) {
+    public function viewDetail($id = null)
+    {
         if (!$id) {
             show_404();
         }
 
-        // Load model untuk ambil data
         $this->load->model('PendatangModel');
 
         $data['Pendatang'] = $this->PendatangModel->get_by_id($id);
-        $data['NamaKaling'] = $this->DaftarModel->get_all_kaling(); 
+        $data['NamaKaling'] = $this->DaftarModel->get_all_kaling();
+        $data['NamaPJ'] = $this->DaftarModel->get_all_pj();
 
         if (!$data['Pendatang']) {
             show_404();
@@ -529,46 +562,87 @@ class Pendatang extends CI_Controller
     public function archive($id)
     {
         $jenisAkun = $this->session->userdata('JenisAkun');
-        if ($jenisAkun != 'Admin' && $jenisAkun != 'Penanggung Jawab') {
+        if ($jenisAkun != 'Admin' && $jenisAkun != 'Penanggung Jawab' && $jenisAkun != 'Kepala Lingkungan') {
             $this->session->set_flashdata('error', 'Anda tidak memiliki hak akses untuk melakukan aksi ini.');
             redirect('pendatang');
+            return;
         }
-    
+
         if ($jenisAkun == 'Penanggung Jawab') {
-            $idPJ = $this->session->userdata('id_user'); 
-            
-            $pendatang = $this->PendatangModel->get_by_id($id); 
-            
-            if (!$pendatang || !isset($pendatang->idPenanggungJawab) || $pendatang->idPenanggungJawab != $idPJ) {
-                 $this->session->set_flashdata('error', 'Aksi ditolak! Anda hanya bisa mengubah data pendatang yang Anda daftarkan.');
-                 redirect('pendatang');
-                 return; 
+            $idPJ_session = $this->session->userdata('id_user');
+            $pendatang = $this->PendatangModel->get_by_id($id);
+
+            if (!$pendatang || !isset($pendatang->idPenanggungJawab) || $pendatang->idPenanggungJawab != $idPJ_session) {
+                $this->session->set_flashdata('error', 'Aksi ditolak! Anda hanya bisa mengubah data pendatang yang Anda daftarkan.');
+                redirect('pendatang');
+                return;
             }
         }
-    
+
         $tanggalKeluar = $this->input->post('tanggal_keluar');
         $alasanKeluar = $this->input->post('alasan_keluar');
-    
+
         if (empty($tanggalKeluar) || empty($alasanKeluar)) {
             $this->session->set_flashdata('error', 'Tanggal dan Alasan keluar wajib diisi.');
             redirect('pendatang');
+            return;
         }
-    
+
         $data = [
             'TanggalKeluar' => $tanggalKeluar,
-            'AlasanKeluar' => $alasanKeluar,  
+            'AlasanKeluar' => $alasanKeluar,
             'StatusTinggal' => 'Tidak Aktif'
         ];
-        
-        // --- GUNAKAN FUNGSI update() DARI MODEL ---
+
         $update = $this->PendatangModel->update($id, $data);
-    
+
         if ($update) {
             $this->session->set_flashdata('success', 'Data pendatang berhasil diarsipkan.');
         } else {
             $this->session->set_flashdata('error', 'Gagal mengarsipkan data pendatang.');
         }
-    
+
         redirect('pendatang');
+    }
+    public function reactivate($id)
+    {
+        $data = [
+            'StatusTinggal' => 'Aktif',
+            'TanggalKeluar' => NULL,
+            'AlasanKeluar'  => '-'
+        ];
+
+        $update = $this->PendatangModel->update($id, $data);
+
+        if ($update) {
+            $this->session->set_flashdata('success', 'Data pendatang berhasil diaktifkan kembali!');
+        } else {
+            $this->session->set_flashdata('error', 'Gagal mengaktifkan kembali data pendatang.');
+        }
+
+        redirect('pendatang');
+    }
+
+    public function get_pj_location($id_pj)
+    {
+        if ($this->session->userdata('JenisAkun') !== 'Admin') {
+            return $this->output->set_status_header(403, 'Forbidden');
+        }
+
+        $pj_data = $this->DaftarModel->get_pj_by_id($id_pj);
+
+        if ($pj_data && !empty($pj_data->Latitude_daftar)) {
+            $response = [
+                'status' => 'success',
+                'latitude' => $pj_data->Latitude_daftar,
+                'longitude' => $pj_data->Longitude_daftar
+            ];
+        } else {
+            $response = ['status' => 'error', 'message' => 'Lokasi untuk PJ ini tidak ditemukan.'];
+        }
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($response));
     }
 }

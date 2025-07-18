@@ -5,13 +5,12 @@ class KeperluanModel extends CI_Model {
 
     public function getAllKeperluan() {
         $query = $this->db->get('tb_keperluan');
-        // Changed to result() for consistency with object access in view and JS
         return $query->result();
     }
 
     public function getKeperluanById($idKeperluan) {
         $this->db->where('idKeperluan', $idKeperluan);
-        return $this->db->get('tb_keperluan')->row(); // Changed to row()
+        return $this->db->get('tb_keperluan')->row(); 
     }
 
     public function insertKeperluan($data) {

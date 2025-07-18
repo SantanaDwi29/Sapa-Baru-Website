@@ -1,6 +1,4 @@
-<?php
-// application/views/profilePage/gantiPassword.php
-?>
+
 
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
@@ -73,7 +71,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     
-    // --- Logika untuk konfirmasi SweetAlert ---
+
     const form = document.getElementById('gantiPasswordForm');
     if (form) {
         form.addEventListener('submit', function(e) {
@@ -95,29 +93,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- Logika BARU untuk show/hide password ---
+
     const togglePasswordIcons = document.querySelectorAll('.toggle-password-visibility');
     
     togglePasswordIcons.forEach(item => {
         item.addEventListener('click', function () {
-            // Ambil target input berdasarkan atribut 'data-target'
+
             const targetId = this.dataset.target;
             const passwordInput = document.getElementById(targetId);
             
-            // Ambil ikon di dalam span yang diklik
+
             const icon = this.querySelector('i');
 
-            // Cek tipe input saat ini
+
             if (passwordInput.type === 'password') {
-                // Jika tipenya password, ubah ke text
+
                 passwordInput.type = 'text';
-                // Ubah ikon mata
+
                 icon.classList.remove('fa-eye-slash');
                 icon.classList.add('fa-eye');
             } else {
-                // Jika tipenya text, kembalikan ke password
+
                 passwordInput.type = 'password';
-                // Kembalikan ikon mata
+
                 icon.classList.remove('fa-eye');
                 icon.classList.add('fa-eye-slash');
             }

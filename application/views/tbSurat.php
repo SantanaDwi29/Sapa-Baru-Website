@@ -138,9 +138,9 @@ $JenisAkun=$this->session->userdata('JenisAkun');
             <tbody id="bodyTerverifikasi">
                 <?php
                 $verified_found = false;
-                $no_verified = 1; // Initialize counter for verified
+                $no_verified = 1; 
                 foreach ($Pengajuan as $item):
-                    $item = (object) $item; // Cast to object if it's an array
+                    $item = (object) $item; 
                     if ($item->StatusPengajuan == 'Terverifikasi'):
                         $verified_found = true;
                 ?>

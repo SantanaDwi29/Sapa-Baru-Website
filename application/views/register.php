@@ -103,7 +103,6 @@
             const email = document.getElementById('email').value.trim();
             const jenisAkun = document.getElementById('jenisAkun').value;
 
-            // Check if all fields are filled
             if (!namaLengkap || !alamat || !nik || !telp || !email || !jenisAkun) {
                 Swal.fire({
                     title: 'Error!',
@@ -115,7 +114,6 @@
                 return false;
             }
 
-            // Validate NIK format (16 digits)
             if (nik.length !== 16 || !/^\d+$/.test(nik)) {
                 Swal.fire({
                     title: 'Error!',
@@ -127,7 +125,6 @@
                 return false;
             }
 
-            // Validate email format
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 Swal.fire({
@@ -140,7 +137,6 @@
                 return false;
             }
 
-            // Check if NIK already exists in the database
             $.ajax({
                 url: '<?= base_url("Register/cekNIK"); ?>',
                 type: 'POST',

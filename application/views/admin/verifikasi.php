@@ -38,7 +38,6 @@
                     <?php
                     $no = 1;
                     foreach ($verifikasi as $item):
-                        if ($item->StatusAktivasi == 'Aktif') continue;
                     ?>
                         <tr class="border-b border-gray-200 hover:bg-gray-100">
                             <td class="py-3 px-6 text-left whitespace-nowrap text-lg"><?= $no++ ?></td>
@@ -135,7 +134,6 @@
     </div>
 </div>
 
-<!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> -->
 
 <script>
     let currentTolakId = null;
